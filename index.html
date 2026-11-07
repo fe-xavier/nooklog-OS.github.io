@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#e8f4ea">
+  <link rel="manifest" href="manifest.json">
+  <title>NookLog OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-phone: #f4f1ea;
+      --text-main: #4a443b;
+      --text-muted: #8c8275;
+      --mint: #88d4ab;
+      --peach: #f7b299;
+      --sky: #8ecae6;
+      --butter: #fde293;
+      --lavender: #cdb4db;
+      --coral: #f28482;
+      --card-bg: #ffffff;
+      --radius-lg: 28px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-phone);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 14px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--peach);
+      margin-right: 6px;
+    }
+    .status-dot.online { background-color: var(--mint); }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 20px 85px 20px;
+    }
+
+    .screen { display: none; animation: popIn 0.18s ease-out; }
+    .screen.active { display: block; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.96); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .phone-title {
+      text-align: center;
+      margin: 10px 0 20px 0;
+      font-size: 1.4rem;
+      color: var(--text-main);
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    .app-icon {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.06);
+      transition: transform 0.1s;
+      padding: 12px;
+    }
+
+    .app-icon:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+    .app-icon span.emoji { font-size: 2.4rem; margin-bottom: 6px; }
+    .app-icon span.label { font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+
+    .bg-mint { background-color: var(--mint); }
+    .bg-peach { background-color: var(--peach); }
+    .bg-sky { background-color: var(--sky); }
+    .bg-butter { background-color: var(--butter); }
+    .bg-lavender { background-color: var(--lavender); }
+    .bg-coral { background-color: var(--coral); color: #fff; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    h2 { font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    label { display: block; font-size: 0.82rem; color: var(--text-muted); margin: 10px 0 4px 0; font-weight: 700; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      border-radius: 14px;
+      border: 2px solid #ece7df;
+      background: #faf8f5;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 600;
+      outline: none;
+      user-select: text;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: var(--mint); }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+    }
+    .btn:active { transform: translateY(2px); }
+    .btn-sm { padding: 8px 12px; font-size: 0.8rem; border-radius: 12px; margin-top: 0; width: auto; }
+
+    .timer-box { text-align: center; padding: 12px 0; }
+    .timer-digits { font-size: 2.6rem; font-weight: 700; letter-spacing: 2px; }
+
+    .progress-bar {
+      width: 100%;
+      height: 18px;
+      background: #ece7df;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .progress-fill { height: 100%; background: var(--mint); width: 0%; transition: width 0.3s ease; }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag {
+      background: #f0ebe1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* Filtros e Cards do Acervo */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .filter-btn {
+      border: none;
+      background: #e6e0d6;
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .filter-btn.active { background: var(--text-main); color: #fff; }
+
+    .archive-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border-bottom: 2px solid #f4f1ea;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .archive-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .archive-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #ece7df;
+      flex-shrink: 0;
+    }
+    .archive-info { flex: 1; min-width: 0; }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .st-agendado { background: var(--butter); color: #6e551c; }
+    .st-rascunho { background: var(--lavender); color: #4a3556; }
+    .st-postado { background: var(--mint); color: #1f5233; }
+    .st-cancelado { background: #e0dcd5; color: #7a7267; text-decoration: line-through; }
+
+    .archive-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* Modal de Edição */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(74, 68, 59, 0.55);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      z-index: 100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--bg-phone);
+      width: 100%;
+      max-width: 380px;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    .nav-bar {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.92);
+      padding: 8px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      z-index: 50;
+    }
+    .home-btn {
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <span id="netStatusDot" class="status-dot"></span>
+      <span id="netStatusText">Offline</span>
+    </div>
+    <div id="clockDisplay">12:00</div>
+    <div id="queueCounter">Fila Local: 0</div>
+  </header>
+
+  <main>
+    <!-- TELA 0: HOME GRID -->
+    <section id="screen-home" class="screen active">
+      <h1 class="phone-title">🍃 NookLog OS</h1>
+      <div class="app-grid">
+        <button class="app-icon bg-mint" onclick="openApp('screen-time')">
+          <span class="emoji">⏱️</span>
+          <span class="label">Tempo</span>
+        </button>
+        <button class="app-icon bg-butter" onclick="openApp('screen-stats')">
+          <span class="emoji">📐</span>
+          <span class="label">Métricas</span>
+        </button>
+        <button class="app-icon bg-peach" onclick="openApp('screen-diary')">
+          <span class="emoji">📸</span>
+          <span class="label">Novo Post</span>
+        </button>
+        <button class="app-icon bg-lavender" onclick="openApp('screen-archive')">
+          <span class="emoji">🗂️</span>
+          <span class="label">Acervo VPS</span>
+        </button>
+        <button class="app-icon bg-sky" style="grid-column: span 2; aspect-ratio: 2.3 / 1;" onclick="openApp('screen-sync')">
+          <span class="emoji" style="font-size: 1.9rem; margin-bottom: 4px;">☁️</span>
+          <span class="label">Sincronia & Ajustes</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TELA 1: RELÓGIO DE PONTO -->
+    <section id="screen-time" class="screen">
+      <h2>⏱️ Registro de Tempo</h2>
+      <div class="card">
+        <label>Data e Categoria</label>
+        <input type="date" id="timeDate">
+        <select id="timeCategory" style="margin-top: 8px;">
+          <option value="Acadêmico">📚 Acadêmico</option>
+          <option value="Pesquisa">🔬 Pesquisa</option>
+          <option value="Trabalho">🛠️ Trabalho</option>
+          <option value="Bem-estar">🧘‍♀️ Bem-estar</option>
+        </select>
+        <div class="timer-box">
+          <div class="timer-digits" id="timerDisplay">00:00:00</div>
+          <button class="btn bg-mint" id="btnToggleTimer" onclick="toggleTimer()">▶ Iniciar Timer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>✏️ Adicionar Manualmente</h2>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex:1;">
+            <label>Horas</label>
+            <input type="number" id="manualHours" placeholder="0" min="0" oninput="previewRounding()">
+          </div>
+          <div style="flex:1;">
+            <label>Minutos</label>
+            <input type="number" id="manualMinutes" placeholder="0" min="0" oninput="previewRounding()">
+          </div>
+        </div>
+        <p id="roundingPreview" style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+          Conversão (múltiplo de 5): <strong>0 min</strong>
+        </p>
+        <button class="btn bg-butter" onclick="saveManualTime()">Salvar Tempo</button>
+      </div>
+    </section>
+
+    <!-- TELA 2: MÉTRICAS E ESCALA -->
+    <section id="screen-stats" class="screen">
+      <h2>📐 Estatísticas e Escala</h2>
+      <div class="card">
+        <label>Selecionar Dia</label>
+        <input type="date" id="statsDate" onchange="renderStats()">
+        <div style="margin-top: 14px;">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
+            <span id="dayMinutesText">0 / 1440 min</span>
+            <span id="dayPercentText">0.0% do dia</span>
+          </div>
+          <div class="progress-bar">
+            <div id="dayProgressFill" class="progress-fill"></div>
+          </div>
+        </div>
+        <p style="font-size:0.9rem; margin-top:10px;">
+          📏 <strong>Escala Geométrica (10m = 1mm):</strong><br>
+          <span id="scaleTotalText">0.0 mm (0.00 cm)</span>
+        </p>
+        <div id="categoryBreakdown" class="tag-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>🏆 Performance & Recordes</h2>
+        <p style="font-size:0.88rem; margin-bottom:6px;">🔥 <strong>Streak Atual:</strong> <span id="streakCount">0</span> dias seguidos</p>
+        <p style="font-size:0.88rem; margin-bottom:6px;">⭐ <strong>Recorde Diário:</strong> <span id="recordDay">0</span> min</p>
+        <p style="font-size:0.88rem; margin-bottom:6px;">📅 <strong>Semana / Mês / Ano:</strong> <span id="periodTotals">0m / 0m / 0m</span></p>
+        <label>Tags Automáticas</label>
+        <div id="autoTags" class="tag-list"></div>
+      </div>
+    </section>
+
+    <!-- TELA 3: NOVO REGISTRO NO DIÁRIO -->
+    <section id="screen-diary" class="screen">
+      <h2>📸 Novo Registro</h2>
+      <div class="card">
+        <label>Foto (Câmera ou Galeria)</label>
+        <input type="file" id="diaryPhoto" accept="image/*" onchange="compressImage(event)">
+        <img id="photoPreview" style="width:100%; border-radius:12px; margin-top:10px; display:none;" />
+
+        <label>Legenda</label>
+        <textarea id="diaryCaption" rows="3" placeholder="Escreva sobre o registro..."></textarea>
+
+        <label>Local</label>
+        <input type="text" id="diaryLocation" placeholder="Ex: Laboratório, Ateliê, Niterói...">
+
+        <label>Data em que ocorreu</label>
+        <input type="date" id="diaryDateOccurred">
+
+        <label>Modo de Salvamento</label>
+        <select id="diarySaveMode" onchange="toggleDelaySelect()">
+          <option value="agendado">🗓️ Agendar Postagem Automática</option>
+          <option value="rascunho">📝 Salvar apenas como Rascunho</option>
+        </select>
+
+        <div id="delayBox">
+          <label>Atraso da Publicação</label>
+          <select id="diaryDelay">
+            <option value="7">+1 Semana (7 dias após o ocorrido)</option>
+            <option value="30">+1 Mês (30 dias após o ocorrido)</option>
+          </select>
+        </div>
+
+        <button class="btn bg-peach" onclick="saveDiaryEntry()">Guardar Registro</button>
+      </div>
+    </section>
+
+    <!-- TELA 4: ACERVO NO VPS (ONLINE) -->
+    <section id="screen-archive" class="screen">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 style="margin:0;">🗂️ Acervo do VPS</h2>
+        <button class="btn btn-sm bg-sky" onclick="fetchVPSArchive()">🔄 Atualizar</button>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setArchiveFilter('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="setArchiveFilter('agendado', this)">Agendados</button>
+        <button class="filter-btn" onclick="setArchiveFilter('rascunho', this)">Rascunhos</button>
+        <button class="filter-btn" onclick="setArchiveFilter('postado', this)">Postados</button>
+      </div>
+
+      <div id="archiveOfflineNotice" class="card" style="display:none; background:#fde293;">
+        ⚠️ <strong>Modo Offline:</strong> Conecte o Wi-Fi para sincronizar, editar ou cancelar itens diretamente no VPS.
+      </div>
+
+      <div class="card" id="archiveContainer">
+        <p style="font-size:0.88rem; color:var(--text-muted);">Toque em "Atualizar" para carregar o acervo do servidor.</p>
+      </div>
+    </section>
+
+    <!-- TELA 5: SINCRONIA & CONFIGURAÇÃO -->
+    <section id="screen-sync" class="screen">
+      <h2>☁️ Conexão com o VPS (n8n)</h2>
+      <div class="card">
+        <label>URL Única do Webhook no n8n</label>
+        <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nooklog" onchange="saveWebhookUrl()">
+        <button class="btn bg-sky" onclick="syncQueueWithVPS()">🔄 Enviar Fila Local para o VPS</button>
+        <button class="btn bg-lavender" onclick="exportBackupJson()">💾 Exportar Backup Local (.JSON)</button>
+      </div>
+
+      <div class="card">
+        <h2>📦 Fila Local no Celular (Offline)</h2>
+        <div id="pendingList" style="font-size:0.85rem; color:var(--text-muted);">Nenhum item pendente no aparelho.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL DE EDIÇÃO DO ACERVO -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2>✏️ Editar Item do Acervo</h2>
+      <input type="hidden" id="editPostId">
+
+      <label>Status do Registro</label>
+      <select id="editStatus">
+        <option value="agendado">🗓️ Agendado para Postar</option>
+        <option value="rascunho">📝 Rascunho (Pausado)</option>
+      </select>
+
+      <label>Data Programada de Postagem</label>
+      <input type="date" id="editScheduledDate">
+
+      <label>Local</label>
+      <input type="text" id="editLocation">
+
+      <label>Legenda</label>
+      <textarea id="editCaption" rows="4"></textarea>
+
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn bg-mint" style="margin:0;" onclick="submitArchiveEdit()">Salvar no VPS</button>
+        <button class="btn" style="margin:0; background:#e0dcd5;" onclick="closeEditModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="home-btn" onclick="openApp('screen-home')">● Tela Inicial</button>
+  </nav>
+
+  <script>
+    // ==========================================
+    // 1. BANCO DE DADOS LOCAL (INDEXEDDB)
+    // ==========================================
+    let db;
+    let vpsArchiveItems = [];
+    let currentArchiveFilter = 'todos';
+
+    const request = indexedDB.open("NookLogDB", 2);
+
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("timeLogs")) {
+        db.createObjectStore("timeLogs", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("diaryQueue")) {
+        db.createObjectStore("diaryQueue", { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      updateQueueCounter();
+      renderStats();
+    };
+
+    // ==========================================
+    // 2. NAVEGAÇÃO E UTILITÁRIOS
+    // ==========================================
+    function openApp(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      if (screenId === 'screen-stats') renderStats();
+      if (screenId === 'screen-sync') renderPendingQueue();
+      if (screenId === 'screen-archive') fetchVPSArchive();
+    }
+
+    function todayISO() {
+      const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+      return (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+    }
+
+    document.getElementById('timeDate').value = todayISO();
+    document.getElementById('statsDate').value = todayISO();
+    document.getElementById('diaryDateOccurred').value = todayISO();
+    document.getElementById('webhookUrl').value = localStorage.getItem('nook_webhook') || '';
+
+    setInterval(() => {
+      document.getElementById('clockDisplay').textContent = new Date().toTimeString().slice(0,5);
+    }, 1000);
+
+    // ==========================================
+    // 3. MÓDULO DE TEMPO (MÚLTIPLOS DE 5)
+    // ==========================================
+    function roundTo5(minutes) {
+      const r = Math.round(minutes / 5) * 5;
+      return r === 0 && minutes > 0 ? 5 : r;
+    }
+
+    function previewRounding() {
+      const h = parseInt(document.getElementById('manualHours').value) || 0;
+      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
+      const rounded = roundTo5((h * 60) + m);
+      document.getElementById('roundingPreview').innerHTML = 
+        `Conversão (múltiplo de 5): <strong>${rounded} min</strong> (${(rounded/10).toFixed(1)} mm)`;
+    }
+
+    function saveManualTime() {
+      const h = parseInt(document.getElementById('manualHours').value) || 0;
+      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
+      const totalRaw = (h * 60) + m;
+      if (totalRaw <= 0) return alert("Insira um tempo válido.");
+      storeTimeEntry(roundTo5(totalRaw));
+      document.getElementById('manualHours').value = '';
+      document.getElementById('manualMinutes').value = '';
+      previewRounding();
+    }
+
+    let timerInterval = null;
+    let timerStart = null;
+
+    function toggleTimer() {
+      const btn = document.getElementById('btnToggleTimer');
+      if (!timerInterval) {
+        timerStart = Date.now();
+        btn.textContent = "⏹ Parar e Salvar";
+        btn.className = "btn bg-peach";
+        timerInterval = setInterval(() => {
+          const diffSec = Math.floor((Date.now() - timerStart) / 1000);
+          const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+          const secs = String(diffSec % 60).padStart(2, '0');
+          document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        const elapsedMin = (Date.now() - timerStart) / 60000;
+        btn.textContent = "▶ Iniciar Timer";
+        btn.className = "btn bg-mint";
+        document.getElementById('timerDisplay').textContent = "00:00:00";
+        storeTimeEntry(roundTo5(elapsedMin));
+      }
+    }
+
+    function storeTimeEntry(minutes) {
+      const entry = {
+        action: "create_time",
+        id: "time_" + Date.now(),
+        date: document.getElementById('timeDate').value,
+        category: document.getElementById('timeCategory').value,
+        minutes: minutes,
+        mm_scale: Number((minutes / 10).toFixed(2)),
+        synced: false
+      };
+      const tx = db.transaction("timeLogs", "readwrite");
+      tx.objectStore("timeLogs").put(entry);
+      tx.oncomplete = () => {
+        alert(`+${minutes} min salvos em ${entry.category}!`);
+        updateQueueCounter();
+      };
+    }
+
+    // ==========================================
+    // 4. ESTATÍSTICAS E ESCALA FÍSICA
+    // ==========================================
+    function renderStats() {
+      if (!db) return;
+      const targetDate = document.getElementById('statsDate').value;
+      const tx = db.transaction("timeLogs", "readonly");
+      const req = tx.objectStore("timeLogs").getAll();
+
+      req.onsuccess = () => {
+        const logs = req.result;
+        const dayLogs = logs.filter(l => l.date === targetDate);
+        const dayTotal = dayLogs.reduce((acc, cur) => acc + cur.minutes, 0);
+        const dayPercent = ((dayTotal / 1440) * 100).toFixed(1);
+
+        document.getElementById('dayMinutesText').textContent = `${dayTotal} / 1440 min`;
+        document.getElementById('dayPercentText').textContent = `${dayPercent}% do dia`;
+        document.getElementById('dayProgressFill').style.width = `${Math.min(dayPercent, 100)}%`;
+        document.getElementById('scaleTotalText').textContent = 
+          `${(dayTotal / 10).toFixed(1)} mm (${(dayTotal / 100).toFixed(2)} cm)`;
+
+        const catTotals = {};
+        dayLogs.forEach(l => catTotals[l.category] = (catTotals[l.category] || 0) + l.minutes);
+        document.getElementById('categoryBreakdown').innerHTML = Object.entries(catTotals)
+          .map(([cat, min]) => `<span class="tag">${cat}: ${min}m (${(min/10).toFixed(1)}mm)</span>`)
+          .join('');
+
+        const mapByDate = {};
+        logs.forEach(l => mapByDate[l.date] = (mapByDate[l.date] || 0) + l.minutes);
+        const allDailyTotals = Object.values(mapByDate);
+        document.getElementById('recordDay').textContent = allDailyTotals.length ? Math.max(...allDailyTotals) : 0;
+
+        let streak = 0;
+        let checkDate = new Date(todayISO() + "T12:00:00");
+        while (true) {
+          const iso = checkDate.toISOString().split('T')[0];
+          if (mapByDate[iso] && mapByDate[iso] > 0) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+        document.getElementById('streakCount').textContent = streak;
+
+        const curMonth = targetDate.slice(0, 7);
+        const curYear = targetDate.slice(0, 4);
+        const nowMs = new Date(targetDate + "T12:00:00").getTime();
+
+        let weekSum = 0, monthSum = 0, yearSum = 0;
+        logs.forEach(l => {
+          const diffDays = (nowMs - new Date(l.date + "T12:00:00").getTime()) / 86400000;
+          if (diffDays >= 0 && diffDays < 7) weekSum += l.minutes;
+          if (l.date.startsWith(curMonth)) monthSum += l.minutes;
+          if (l.date.startsWith(curYear)) yearSum += l.minutes;
+        });
+        document.getElementById('periodTotals').textContent = `${weekSum}m / ${monthSum}m / ${yearSum}m`;
+
+        const tags = [];
+        if (dayTotal >= 360) tags.push("⚡ Alta Densidade (+25%)");
+        if (streak >= 3) tags.push(`🔥 Consistência (${streak}d)`);
+        if ((catTotals["Pesquisa"] || 0) >= 120) tags.push("🔬 Foco Pesquisa");
+        if ((catTotals["Bem-estar"] || 0) >= 30) tags.push("🌿 Equilíbrio");
+        if (tags.length === 0) tags.push("🌱 Dia em Construção");
+        document.getElementById('autoTags').innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+      };
+    }
+
+    // ==========================================
+    // 5. NOVO POST (DUPLA COMPRESSÃO + RASCUNHO)
+    // ==========================================
+    let currentFullBase64 = null;
+    let currentThumbBase64 = null;
+
+    function toggleDelaySelect() {
+      const mode = document.getElementById('diarySaveMode').value;
+      document.getElementById('delayBox').style.display = (mode === 'agendado') ? 'block' : 'none';
+    }
+
+    function compressImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // 1. Versão Postagem (1080px)
+          const canvasFull = document.createElement('canvas');
+          const scaleFull = img.width > 1080 ? 1080 / img.width : 1;
+          canvasFull.width = img.width * scaleFull;
+          canvasFull.height = img.height * scaleFull;
+          canvasFull.getContext('2d').drawImage(img, 0, 0, canvasFull.width, canvasFull.height);
+          currentFullBase64 = canvasFull.toDataURL('image/jpeg', 0.72);
+
+          // 2. Versão Miniatura para o Acervo no J4 (280px)
+          const canvasThumb = document.createElement('canvas');
+          const scaleThumb = img.width > 280 ? 280 / img.width : 1;
+          canvasThumb.width = img.width * scaleThumb;
+          canvasThumb.height = img.height * scaleThumb;
+          canvasThumb.getContext('2d').drawImage(img, 0, 0, canvasThumb.width, canvasThumb.height);
+          currentThumbBase64 = canvasThumb.toDataURL('image/jpeg', 0.6);
+
+          const preview = document.getElementById('photoPreview');
+          preview.src = currentThumbBase64;
+          preview.style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveDiaryEntry() {
+      const caption = document.getElementById('diaryCaption').value.trim();
+      const dateOccurred = document.getElementById('diaryDateOccurred').value;
+      const statusMode = document.getElementById('diarySaveMode').value;
+      const delayDays = parseInt(document.getElementById('diaryDelay').value);
+
+      if (!currentFullBase64 && !caption) {
+        return alert("Adicione pelo menos uma foto ou legenda.");
+      }
+
+      const targetDateObj = new Date(dateOccurred + "T12:00:00");
+      targetDateObj.setDate(targetDateObj.getDate() + delayDays);
+      const scheduledDate = targetDateObj.toISOString().split('T')[0];
+
+      const entry = {
+        action: "create_post",
+        id: "post_" + Date.now(),
+        date_occurred: dateOccurred,
+        scheduled_post_date: scheduledDate,
+        status: statusMode, // 'agendado' ou 'rascunho'
+        location: document.getElementById('diaryLocation').value.trim(),
+        caption: caption,
+        thumb_base64: currentThumbBase64,
+        image_base64: currentFullBase64,
+        synced: false
+      };
+
+      const tx = db.transaction("diaryQueue", "readwrite");
+      tx.objectStore("diaryQueue").put(entry);
+      tx.oncomplete = () => {
+        alert(statusMode === 'rascunho' ? "Guardado como Rascunho!" : `Agendado para ${scheduledDate}!`);
+        document.getElementById('diaryCaption').value = '';
+        document.getElementById('diaryLocation').value = '';
+        document.getElementById('photoPreview').style.display = 'none';
+        currentFullBase64 = null;
+        currentThumbBase64 = null;
+        updateQueueCounter();
+        if (navigator.onLine) syncQueueWithVPS();
+      };
+    }
+
+    // ==========================================
+    // 6. ACERVO DO VPS (LISTAR, EDITAR, CANCELAR)
+    // ==========================================
+    function setArchiveFilter(filter, btnEl) {
+      currentArchiveFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderArchiveList();
+    }
+
+    async function fetchVPSArchive() {
+      const webhook = localStorage.getItem('nook_webhook');
+      const notice = document.getElementById('archiveOfflineNotice');
+      const container = document.getElementById('archiveContainer');
+
+      if (!navigator.onLine) {
+        notice.style.display = 'block';
+        return;
+      }
+      notice.style.display = 'none';
+
+      if (!webhook) {
+        container.innerHTML = `<p style="font-size:0.88rem; color:var(--text-muted);">Configure a URL do Webhook na aba Sincronia primeiro.</p>`;
+        return;
+      }
+
+      container.innerHTML = `<p style="font-size:0.88rem; color:var(--text-muted);">⏳ Buscando acervo no VPS...</p>`;
+
+      try {
+        // Primeiro garante que a fila local subiu
+        await syncQueueWithVPS();
+
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "list_posts" })
+        });
+        const data = await resp.json();
+        vpsArchiveItems = Array.isArray(data) ? data : (data.items || []);
+        renderArchiveList();
+      } catch (err) {
+        container.innerHTML = `<p style="font-size:0.88rem; color:var(--coral);">Não foi possível conectar ao VPS. Verifique o Webhook.</p>`;
+      }
+    }
+
+    function renderArchiveList() {
+      const container = document.getElementById('archiveContainer');
+      const filtered = vpsArchiveItems.filter(item => {
+        if (currentArchiveFilter === 'todos') return true;
+        return item.status === currentArchiveFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p style="font-size:0.88rem; color:var(--text-muted);">Nenhum item encontrado neste filtro.</p>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const badgeClass = `st-${item.status || 'rascunho'}`;
+        const canModify = item.status !== 'postado';
+        const thumbSrc = item.thumb_base64 || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><rect width="100%" height="100%" fill="%23ece7df"/></svg>';
+
+        return `
+          <div class="archive-item">
+            <img class="archive-thumb" src="${thumbSrc}" alt="Thumb" />
+            <div class="archive-info">
+              <span class="status-badge ${badgeClass}">${item.status}</span>
+              <div style="font-size:0.78rem; color:var(--text-muted); font-weight:700;">
+                📍 ${item.location || 'Sem local'} • Ocorreu: ${item.date_occurred}
+              </div>
+              <div style="font-size:0.78rem; color:var(--text-main); font-weight:700; margin-bottom:4px;">
+                🗓️ Postagem: ${item.scheduled_post_date || '—'}
+              </div>
+              <p style="font-size:0.86rem; color:var(--text-main); word-break:break-word;">
+                ${item.caption || '<em>Sem legenda</em>'}
+              </p>
+              ${canModify ? `
+                <div class="archive-actions">
+                  <button class="btn btn-sm bg-butter" onclick="openEditModal('${item.id}')">✏️ Editar</button>
+                  ${item.status !== 'cancelado' ? `
+                    <button class="btn btn-sm bg-coral" onclick="cancelScheduledPost('${item.id}')">✖ Cancelar</button>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditModal(postId) {
+      if (!navigator.onLine) return alert("Você precisa de conexão com a internet para editar itens do VPS.");
+      const item = vpsArchiveItems.find(i => String(i.id) === String(postId));
+      if (!item) return;
+
+      document.getElementById('editPostId').value = item.id;
+      document.getElementById('editStatus').value = item.status === 'cancelado' ? 'rascunho' : item.status;
+      document.getElementById('editScheduledDate').value = item.scheduled_post_date;
+      document.getElementById('editLocation').value = item.location || '';
+      document.getElementById('editCaption').value = item.caption || '';
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    async function submitArchiveEdit() {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine) return alert("Sem conexão com o VPS.");
+
+      const payload = {
+        action: "update_post",
+        id: document.getElementById('editPostId').value,
+        status: document.getElementById('editStatus').value,
+        scheduled_post_date: document.getElementById('editScheduledDate').value,
+        location: document.getElementById('editLocation').value.trim(),
+        caption: document.getElementById('editCaption').value.trim()
+      };
+
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          closeEditModal();
+          fetchVPSArchive();
+        }
+      } catch (err) {
+        alert("Erro ao salvar alterações no VPS.");
+      }
+    }
+
+    async function cancelScheduledPost(postId) {
+      if (!navigator.onLine) return alert("Conecte-se à internet para cancelar uma postagem no VPS.");
+      if (!confirm("Deseja cancelar o agendamento desta postagem?")) return;
+
+      const webhook = localStorage.getItem('nook_webhook');
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "cancel_post", id: postId })
+        });
+        if (resp.ok) fetchVPSArchive();
+      } catch (err) {
+        alert("Falha ao comunicar cancelamento ao VPS.");
+      }
+    }
+
+    // ==========================================
+    // 7. SINCRONIZAÇÃO OFFLINE -> VPS
+    // ==========================================
+    function saveWebhookUrl() {
+      localStorage.setItem('nook_webhook', document.getElementById('webhookUrl').value.trim());
+    }
+
+    function updateNetworkUI() {
+      const dot = document.getElementById('netStatusDot');
+      const txt = document.getElementById('netStatusText');
+      if (navigator.onLine) {
+        dot.classList.add('online');
+        txt.textContent = "Online";
+        syncQueueWithVPS();
+      } else {
+        dot.classList.remove('online');
+        txt.textContent = "Offline";
+      }
+    }
+
+    window.addEventListener('online', updateNetworkUI);
+    window.addEventListener('offline', updateNetworkUI);
+
+    function updateQueueCounter() {
+      if (!db) return;
+      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
+      const r1 = tx.objectStore("timeLogs").getAll();
+      const r2 = tx.objectStore("diaryQueue").getAll();
+      tx.oncomplete = () => {
+        const p1 = r1.result.filter(i => !i.synced).length;
+        const p2 = r2.result.filter(i => !i.synced).length;
+        document.getElementById('queueCounter').textContent = `Fila Local: ${p1 + p2}`;
+      };
+    }
+
+    function renderPendingQueue() {
+      if (!db) return;
+      const tx = db.transaction("diaryQueue", "readonly");
+      const req = tx.objectStore("diaryQueue").getAll();
+      req.onsuccess = () => {
+        const pending = req.result.filter(i => !i.synced);
+        const container = document.getElementById('pendingList');
+        if (pending.length === 0) {
+          container.innerHTML = "Todos os registros de diário já subiram para o VPS.";
+          return;
+        }
+        container.innerHTML = pending.map(p => 
+          `<div style="padding:8px 0; border-bottom:1px solid #eee;">
+            📸 <strong>[${p.status.toUpperCase()}]</strong> Ocorreu: ${p.date_occurred} → Postar: ${p.scheduled_post_date}<br>
+            <span>${(p.caption || '').slice(0, 50)}...</span>
+          </div>`
+        ).join('');
+      };
+    }
+
+    async function syncQueueWithVPS() {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine || !db) return;
+
+      const txDiary = db.transaction("diaryQueue", "readonly");
+      const diaryItems = await new Promise(res => {
+        const r = txDiary.objectStore("diaryQueue").getAll();
+        r.onsuccess = () => res(r.result.filter(i => !i.synced));
+      });
+
+      for (const item of diaryItems) {
+        try {
+          const resp = await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          if (resp.ok) {
+            const delTx = db.transaction("diaryQueue", "readwrite");
+            delTx.objectStore("diaryQueue").delete(item.id);
+          }
+        } catch (err) {}
+      }
+
+      const txTime = db.transaction("timeLogs", "readonly");
+      const timeItems = await new Promise(res => {
+        const r = txTime.objectStore("timeLogs").getAll();
+        r.onsuccess = () => res(r.result.filter(i => !i.synced));
+      });
+
+      for (const item of timeItems) {
+        try {
+          const resp = await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          if (resp.ok) {
+            item.synced = true;
+            const putTx = db.transaction("timeLogs", "readwrite");
+            putTx.objectStore("timeLogs").put(item);
+          }
+        } catch (err) {}
+      }
+
+      updateQueueCounter();
+      renderPendingQueue();
+    }
+
+    function exportBackupJson() {
+      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
+      const r1 = tx.objectStore("timeLogs").getAll();
+      const r2 = tx.objectStore("diaryQueue").getAll();
+      tx.oncomplete = () => {
+        const blob = new Blob([JSON.stringify({ timeLogs: r1.result, diaryQueue: r2.result }, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `nooklog-backup-${todayISO()}.json`;
+        a.click();
+      };
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+    updateNetworkUI();
+  </script>
+</body>
+</html>

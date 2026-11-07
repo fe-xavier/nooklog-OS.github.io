@@ -1,0 +1,16 @@
+{
+  "name": "NookLog OS",
+  "short_name": "NookLog",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#e8f4ea",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2917/2917995.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
