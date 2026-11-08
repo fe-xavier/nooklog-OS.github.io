@@ -2,15 +2,13 @@
   "name": "NookPhone OS",
   "short_name": "NookPhone",
   "start_url": "./index.html",
-  "display": "standalone",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#f5f0e8",
   "theme_color": "#f5f0e8",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "media/AC_froggychair.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "media/AC_froggychair.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }
