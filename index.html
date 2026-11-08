@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#f5f0e8">
   <link rel="manifest" href="manifest.json">
@@ -16,7 +16,12 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+    html, body { margin: 0; height: 100%; overscroll-behavior: none; touch-action: manipulation; }
+    /* o corpo acompanha a área realmente visível (some o espaço fantasma e sobe junto com o teclado) */
+    body { position: fixed; left: 0; right: 0; top: var(--app-top, 0px); height: var(--app-h, 100%); }
+    .kb-open #footerBar { display: none; }
+    .ic { display: inline-flex; width: 1.15em; height: 1.15em; flex-shrink: 0; vertical-align: -0.2em; }
+    .ic svg { display: block; width: 100%; height: 100%; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -35,7 +40,7 @@
     #screen-home { margin-top: auto; margin-bottom: auto; }
   </style>
 </head>
-<body class="bg-[#e4decb] min-h-screen flex items-center justify-center p-0 sm:p-4 overflow-hidden">
+<body class="bg-[#e4decb] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
   <!-- CHASSI DO NOOKPHONE -->
   <div class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-all duration-500 ease-out translate-y-0 overflow-hidden">
@@ -183,7 +188,7 @@
             <div>
               <div class="h-5 flex items-center justify-between">
                 <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Categoria</label>
-                <button type="button" onclick="openTagManager()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2 rounded-full leading-4 active:scale-95 transition-transform" title="Gerenciar tags">✏️ Tags</button>
+                <button type="button" onclick="openTagManager()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2 rounded-full leading-4 inline-flex items-center gap-1 active:scale-95 transition-transform" title="Gerenciar tags"><span data-icon="pencil" class="ic"></span>Tags</button>
               </div>
               <input type="hidden" id="timeCategory" value="Acadêmico"><button type="button" onclick="openPicker('timeCategory')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5  text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="timeCategory_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
             </div>
@@ -191,8 +196,8 @@
 
           <div class="bg-[#f5f0e8] rounded-2xl p-3 text-center border border-[#e0daca]">
             <div id="timerDisplay" class="text-3xl font-bold text-[#3d3d3d] tracking-wider mb-2">00:00:00</div>
-            <button id="btnToggleTimer" onclick="toggleTimer()" class="w-full bg-[#88d4ab] text-[#2d4739] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">
-              ▶ Iniciar Timer
+            <button id="btnToggleTimer" onclick="toggleTimer()" class="w-full bg-[#88d4ab] text-[#2d4739] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5">
+              <span data-icon="play" class="ic"></span>Iniciar Timer
             </button>
           </div>
         </div>
@@ -261,12 +266,12 @@
         <!-- Calendário mensal -->
         <div class="bg-[#fffdf9] rounded-3xl p-3 shadow-sm border border-[#e0daca] mb-3">
           <div class="flex items-center justify-between mb-2">
-            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none">‹</button>
+            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none flex items-center justify-center active:scale-90" data-snd="scroll"><span data-icon="chevleft" class="ic"></span></button>
             <div class="text-center">
               <div id="calTitle" class="text-sm font-bold text-[#3d3d3d]">Novembro 2026</div>
               <div id="calMonthTotal" class="text-[10px] font-bold text-[#8c7b6b]">0m no mês</div>
             </div>
-            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none">›</button>
+            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none flex items-center justify-center active:scale-90" data-snd="scroll"><span data-icon="chevron" class="ic"></span></button>
           </div>
 
           <div class="grid grid-cols-7 gap-1 mb-1 text-center">
@@ -346,11 +351,11 @@
         <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca]">
           <div class="grid grid-cols-2 gap-2.5 mb-3">
             <div class="bg-[#f5f0e8] p-3 rounded-2xl border border-[#e0daca] text-center">
-              <div class="text-[10px] font-bold text-[#8c7b6b]">🔥 STREAK ATUAL</div>
+              <div class="text-[10px] font-bold text-[#8c7b6b] flex items-center justify-center gap-1"><span data-icon="flame" class="ic"></span>STREAK ATUAL</div>
               <div class="text-lg font-bold text-[#3d3d3d]"><span id="streakCount">0</span> dias</div>
             </div>
             <div class="bg-[#f5f0e8] p-3 rounded-2xl border border-[#e0daca] text-center">
-              <div class="text-[10px] font-bold text-[#8c7b6b]">⭐ RECORDE DIÁRIO</div>
+              <div class="text-[10px] font-bold text-[#8c7b6b] flex items-center justify-center gap-1"><span data-icon="star" class="ic"></span>RECORDE DIÁRIO</div>
               <div class="text-lg font-bold text-[#3d3d3d]"><span id="recordDay">0</span> min</div>
             </div>
           </div>
@@ -376,14 +381,14 @@
           <div>
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Foto ou Mídia</label>
             <div class="grid grid-cols-2 gap-2 mt-0.5">
-              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryCamera').click()" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">📷 Tirar agora</button>
-              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryUpload').click()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">🖼️ Enviar</button>
+              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryCamera').click()" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="camera" class="ic"></span>Tirar agora</button>
+              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryUpload').click()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="image" class="ic"></span>Enviar</button>
             </div>
             <input type="file" id="diaryCamera" accept="image/*,video/*" capture="environment" onchange="handleMedia(event)" class="hidden">
             <input type="file" id="diaryUpload" accept="image/*,video/*" onchange="handleMedia(event)" class="hidden">
             <div id="mediaInfo" class="hidden flex items-center justify-between gap-2 bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1 mt-2">
-              <span id="mediaInfoText" class="text-[11px] font-bold text-[#3d3d3d] truncate"></span>
-              <button type="button" onclick="playNookSound('menuClose'); clearMedia()" class="text-[11px] font-bold text-[#ee7b6d] flex-shrink-0" title="Remover mídia">✕</button>
+              <span id="mediaInfoText" class="flex items-center gap-1.5 text-[11px] font-bold text-[#3d3d3d] min-w-0"></span>
+              <button type="button" onclick="playNookSound('menuClose'); clearMedia()" class="text-[11px] font-bold text-[#ee7b6d] flex-shrink-0" title="Remover mídia"><span data-icon="x" class="ic"></span></button>
             </div>
             <img id="photoPreview" class="w-full h-32 object-cover rounded-2xl mt-2 hidden border border-[#e0daca]" />
           </div>
@@ -431,7 +436,7 @@
             <h2 class="text-sm font-bold text-[#3d3d3d]">Acervo no VPS</h2>
           </div>
           <div class="flex gap-1">
-            <button onclick="playNookSound('redo'); fetchVPSArchive();" class="text-xs font-bold text-[#3d3d3d] bg-[#8ecae6] px-2.5 py-1 rounded-full">↻</button>
+            <button onclick="playNookSound('redo'); fetchVPSArchive();" class="text-xs font-bold text-[#3d3d3d] bg-[#8ecae6] px-2.5 py-1 rounded-full flex items-center" title="Atualizar"><span data-icon="refresh" class="ic"></span></button>
             <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
           </div>
         </div>
@@ -444,11 +449,11 @@
         </div>
 
         <div id="archiveOfflineNotice" class="hidden bg-[#fde293] text-[#5a4b3c] text-xs font-bold p-3 rounded-2xl mb-2">
-          ⚠️ Modo Offline: conecte o Wi-Fi para ver, editar ou cancelar itens do VPS.
+          <span class="flex items-start gap-1.5"><span data-icon="alert" class="ic mt-px"></span><span>Modo Offline: conecte o Wi-Fi para ver, editar ou cancelar itens do VPS.</span></span>
         </div>
 
         <div id="archiveContainer" class="space-y-2 text-xs text-[#8c7b6b]">
-          Toque em ↻ para buscar os registros do servidor.
+          Toque no botão de atualizar para buscar os registros do servidor.
         </div>
       </section>
 
@@ -465,11 +470,11 @@
         </div>
 
         <div id="queueHint" class="hidden bg-[#fde293] text-[#5a4b3c] text-[11px] font-bold p-2.5 rounded-2xl mb-3">
-          ⚠️ Webhook não configurado. Defina em Ajustes para enviar.
+          <span class="flex items-start gap-1.5"><span data-icon="alert" class="ic mt-px"></span><span>Webhook não configurado. Defina em Ajustes para enviar.</span></span>
         </div>
 
-        <button onclick="syncQueueWithVPS(true)" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform mb-3">
-          ☁️ Sincronizar agora
+        <button onclick="syncQueueWithVPS(true)" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform mb-3 flex items-center justify-center gap-1.5">
+          <span data-icon="cloud" class="ic"></span>Sincronizar agora
         </button>
 
         <div>
@@ -492,7 +497,7 @@
 
         <!-- Envio -->
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2.5">
-          <div class="text-xs font-bold text-[#3d3d3d]">☁️ Envio</div>
+          <div class="text-xs font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="cloud" class="ic"></span>Envio</div>
           <div>
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">URL do Webhook no n8n</label>
             <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nook" onchange="saveWebhookUrl()" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5">
@@ -504,12 +509,12 @@
             </div>
             <button id="autoSyncSwitch" onclick="toggleAutoSync()" class="flex-shrink-0 w-11 h-6 rounded-full relative transition-colors bg-[#e0daca]"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"></span></button>
           </div>
-          <button onclick="testWebhook()" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">🔌 Testar conexão</button>
+          <button onclick="testWebhook()" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5"><span data-icon="plug" class="ic"></span>Testar conexão</button>
         </div>
 
         <!-- Aplicativo -->
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2.5">
-          <div class="text-xs font-bold text-[#3d3d3d]">📱 Aplicativo</div>
+          <div class="text-xs font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="smartphone" class="ic"></span>Aplicativo</div>
           <div class="flex items-center justify-between gap-3">
             <div class="text-xs font-bold text-[#3d3d3d]">Sons</div>
             <button id="soundSwitch" onclick="toggleMute()" class="flex-shrink-0 w-11 h-6 rounded-full relative transition-colors bg-[#e0daca]"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"></span></button>
@@ -529,12 +534,12 @@
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Minutos do The Roost</label>
             <input type="number" id="roostMinutes" min="5" max="240" step="5" value="15" onchange="saveRoostMinutes()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d]">
           </div>
-          <button onclick="openTagManager()" class="w-full bg-[#fde293] text-[#5a4b3c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">🏷️ Tags do Timer</button>
+          <button onclick="openTagManager()" class="w-full bg-[#fde293] text-[#5a4b3c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5"><span data-icon="tag" class="ic"></span>Tags do Timer</button>
         </div>
 
         <!-- Dados -->
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] space-y-2">
-          <div class="text-xs font-bold text-[#3d3d3d]">💾 Dados</div>
+          <div class="text-xs font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="database" class="ic"></span>Dados</div>
           <div class="grid grid-cols-2 gap-2">
             <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Backup JSON</button>
             <button onclick="confirmClearCache()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Limpar cache</button>
@@ -545,9 +550,9 @@
     </div>
 
     <!-- MODAL DE EDIÇÃO DE ITEM DO ACERVO -->
-    <div id="editModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
-        <h3 id="editModalTitle" class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Registro do VPS</h3>
+    <div id="editModal" class="hidden absolute inset-0 bg-black/40 z-40 flex p-3 overflow-y-auto hide-scrollbar">
+      <div class="m-auto bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
+        <h3 class="text-sm font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="pencil" class="ic"></span><span id="editModalTitle">Editar Registro do VPS</span></h3>
         <input type="hidden" id="editPostId">
 
         <div>
@@ -579,9 +584,9 @@
     </div>
 
     <!-- MODAL DE EDIÇÃO DE ATIVIDADE (TEMPO) -->
-    <div id="timeEditModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
-        <h3 class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Atividade</h3>
+    <div id="timeEditModal" class="hidden absolute inset-0 bg-black/40 z-40 flex p-3 overflow-y-auto hide-scrollbar">
+      <div class="m-auto bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
+        <h3 class="text-sm font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="pencil" class="ic"></span>Editar Atividade</h3>
         <input type="hidden" id="timeEditId">
 
         <div>
@@ -607,18 +612,17 @@
     </div>
 
     <!-- MODAL: TAGS DO TIMER -->
-    <div id="tagModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl">
-        <h3 class="text-sm font-bold text-[#3d3d3d] mb-2">🏷️ Tags do Timer</h3>
-        <div id="tagList" class="space-y-2 max-h-[220px] overflow-y-auto hide-scrollbar"></div>
+    <div id="tagModal" class="hidden absolute inset-0 bg-black/40 z-40 flex p-3 overflow-y-auto hide-scrollbar">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl m-auto">
+        <h3 class="text-sm font-bold text-[#3d3d3d] mb-2 flex items-center gap-1.5"><span data-icon="tag" class="ic"></span>Tags do Timer</h3>
+        <div id="tagList" class="space-y-2 max-h-[150px] overflow-y-auto hide-scrollbar"></div>
 
         <div class="mt-3">
           <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Nova tag</label>
-          <div class="flex gap-1.5 mt-0.5">
-            <input type="text" id="newTagEmoji" maxlength="8" placeholder="😀" class="w-11 text-center text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-1 py-1.5">
-            <input type="text" id="newTagName" maxlength="18" placeholder="Nome da tag" onkeydown="if (event.key === 'Enter') addTag()" class="flex-1 min-w-0 text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
-          </div>
-          <button onclick="addTag()" class="w-full mt-2 bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform">+ Adicionar tag</button>
+          <input type="text" id="newTagName" maxlength="18" placeholder="Nome da tag" onkeydown="if (event.key === 'Enter') addTag()" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d]">
+          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase block mt-2">Ícone</label>
+          <div id="tagIconGrid" class="grid grid-cols-6 gap-1.5 mt-1"></div>
+          <button onclick="addTag()" class="w-full mt-2.5 bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-1.5"><span data-icon="plus" class="ic"></span>Adicionar tag</button>
         </div>
 
         <button onclick="closeTagManager()" class="w-full mt-2 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
@@ -626,8 +630,8 @@
     </div>
 
     <!-- SELETOR PRÓPRIO (no lugar da caixa de seleção nativa) -->
-    <div id="pickerModal" class="hidden absolute inset-0 bg-black/40 z-[55] flex items-center justify-center p-4" onclick="if (event.target === this) closePicker()">
-      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl">
+    <div id="pickerModal" class="hidden absolute inset-0 bg-black/40 z-[55] flex p-3 overflow-y-auto hide-scrollbar" onclick="if (event.target === this) closePicker()">
+      <div class="m-auto bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl">
         <h3 id="pickerTitle" class="text-sm font-bold text-[#3d3d3d] mb-2 px-1">Selecionar</h3>
         <div id="pickerList" class="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar"></div>
         <button onclick="closePicker()" class="w-full mt-3 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
@@ -635,8 +639,8 @@
     </div>
 
     <!-- POPUP DE CONFIRMAÇÃO (substitui o confirm() do navegador) -->
-    <div id="confirmModal" class="hidden absolute inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
-      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-5 w-full max-w-[290px] shadow-xl text-center">
+    <div id="confirmModal" class="hidden absolute inset-0 bg-black/40 z-[60] flex p-3 overflow-y-auto hide-scrollbar">
+      <div class="m-auto bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-5 w-full max-w-[290px] shadow-xl text-center">
         <img src="media/AC_froggychair.png" class="w-12 h-12 object-contain mx-auto mb-1 drop-shadow-md" alt="">
         <h3 id="confirmTitle" class="text-sm font-bold text-[#3d3d3d]">Confirmar</h3>
         <p id="confirmMessage" class="text-xs font-semibold text-[#8c7b6b] mt-1 mb-3"></p>
@@ -648,7 +652,7 @@
     </div>
 
     <!-- RODAPÉ EM PÍLULA -->
-    <div class="flex items-center justify-center py-2.5 px-4 border-t border-[#e0daca]">
+    <div id="footerBar" class="flex items-center justify-center py-2.5 px-4 border-t border-[#e0daca]">
       <button onclick="goHome()" ondblclick="forceClearCache()" class="inline-block px-4 py-1 border border-[#e0daca] rounded-full text-xs text-[#c7beaa] active:scale-95 transition-transform">
         <span id="footerPillText" class="font-bold text-[#c7beaa]">Toque para Home • 2x limpa cache</span>
       </button>
@@ -660,21 +664,75 @@
     // ==========================================
     // 0. ALTURA REAL DA TELA + TELA CHEIA
     // ==========================================
+    let maxViewportH = 0;
+
     function setAppHeight() {
-      document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+      const vv = window.visualViewport;
+      const h = Math.round(vv ? vv.height : window.innerHeight);
+      const top = Math.round(vv ? vv.offsetTop : 0);
+      const root = document.documentElement;
+      root.style.setProperty('--app-h', h + 'px');
+      root.style.setProperty('--app-top', top + 'px');
+
+      // Teclado virtual aberto = área visível bem menor que a maior já vista
+      maxViewportH = Math.max(maxViewportH, h);
+      const kb = h < maxViewportH - 140;
+      document.body.classList.toggle('kb-open', kb);
+      if (!kb && (window.scrollX || window.scrollY)) window.scrollTo(0, 0);
     }
+
+    // Reajusta várias vezes: depois do seletor de arquivos / saída da tela cheia o Chrome demora a estabilizar
+    function scheduleHeightFix() {
+      setAppHeight();
+      [120, 400, 900, 1800].forEach(ms => setTimeout(() => {
+        if (!document.body.classList.contains('kb-open')) maxViewportH = 0;
+        setAppHeight();
+      }, ms));
+    }
+
     window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', () => { maxViewportH = 0; scheduleHeightFix(); });
+    window.addEventListener('focus', scheduleHeightFix);
+    window.addEventListener('pageshow', scheduleHeightFix);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleHeightFix(); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', setAppHeight);
+      window.visualViewport.addEventListener('scroll', setAppHeight);
+    }
     setAppHeight();
+
+    // Campo de texto sempre visível quando o teclado abre
+    document.addEventListener('focusin', (e) => {
+      const el = e.target;
+      if (el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && el.type !== 'file') {
+        setTimeout(() => { try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {} }, 350);
+      }
+    });
+
+    // ---- Tela cheia (e volta sozinha depois do seletor de arquivos) ----
+    function isPwaMode() {
+      return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
+    }
 
     function goFullscreen() {
       const el = document.documentElement;
       const rf = el.requestFullscreen || el.webkitRequestFullscreen;
-      const isPwa = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
-      if (rf && !isPwa && !document.fullscreenElement) {
+      if (rf && !isPwaMode() && !document.fullscreenElement && !document.webkitFullscreenElement) {
         try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
       }
     }
-    document.addEventListener('click', goFullscreen, { once: true });
+
+    let fsArmed = false;
+    function armFullscreen() {
+      if (fsArmed || isPwaMode()) return;
+      fsArmed = true;
+      document.addEventListener('click', () => { fsArmed = false; goFullscreen(); }, { once: true });
+    }
+    armFullscreen();
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) armFullscreen(); // saiu: volta no próximo toque
+      scheduleHeightFix();
+    }));
 
     // ==========================================
     // 1. SONS DO NOOKPHONE (media/sound/)
@@ -711,13 +769,28 @@
     const bufferCache = {};
     const activeSources = {};
     const fallbackAudio = {};
+    const lastPlayed = {};
     let lastScrollSound = 0;
 
+    // Ordem de carregamento: os sons de navegação primeiro
+    const DECODE_ORDER = ['menuOpen', 'menuClose', 'select', 'phoneOpen', 'scroll', 'stamp', 'pointGet', 'postDelete', 'redo', 'flag', 'enter', 'balloon', 'postMove', 'wait', 'appStart', 'nookSend', 'nookTritone'];
+
     function initSounds() {
+      // <audio> pré-carregado: serve de reserva até o Web Audio terminar de decodificar
+      DECODE_ORDER.forEach(key => {
+        if (!SOUND_PATHS[key]) return;
+        try {
+          const a = new Audio();
+          a.preload = 'auto';
+          a.src = encodeURI(SOUND_PATHS[key]);
+          fallbackAudio[key] = a;
+        } catch (e) {}
+      });
+
       try {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (AC) {
-          audioCtx = new AC();
+          try { audioCtx = new AC({ latencyHint: 'interactive' }); } catch (e) { audioCtx = new AC(); }
           masterGain = audioCtx.createGain();
           masterGain.gain.value = SOUND_GAIN;
           const limiter = audioCtx.createDynamicsCompressor();
@@ -728,23 +801,51 @@
           limiter.release.value = 0.15;
           masterGain.connect(limiter);
           limiter.connect(audioCtx.destination);
-
-          Object.entries(SOUND_PATHS).forEach(([key, path]) => {
-            fetch(encodeURI(path))
-              .then(r => r.arrayBuffer())
-              .then(buf => new Promise((res, rej) => audioCtx.decodeAudioData(buf, res, rej)))
-              .then(decoded => { bufferCache[key] = decoded; })
-              .catch(() => {});
-          });
-
-          // O navegador só libera o áudio depois de um toque na tela
-          const unlock = () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); };
-          ['pointerdown', 'touchend', 'click'].forEach(ev => document.addEventListener(ev, unlock));
+          loadBuffers();
         }
       } catch (e) {
         audioCtx = null;
       }
+
+      // O navegador só libera o áudio depois de um toque na tela
+      const unlock = () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); };
+      ['pointerdown', 'touchend', 'click'].forEach(ev => document.addEventListener(ev, unlock, true));
+
+      // Som no instante do toque (não espera soltar o dedo): botões marcados com data-snd
+      document.addEventListener('pointerdown', (e) => {
+        const el = e.target && e.target.closest ? e.target.closest('[data-snd]') : null;
+        if (el && !el.disabled) playNookSound(el.getAttribute('data-snd'));
+      }, { capture: true, passive: true });
+
+      applySoundHooks();
       updateSoundUI();
+    }
+
+    // Decodifica um som por vez (aparelho com pouca memória)
+    async function loadBuffers() {
+      for (const key of DECODE_ORDER) {
+        const path = SOUND_PATHS[key];
+        if (!path || !audioCtx) continue;
+        try {
+          const resp = await fetch(encodeURI(path));
+          const data = await resp.arrayBuffer();
+          bufferCache[key] = await new Promise((res, rej) => {
+            const p = audioCtx.decodeAudioData(data, res, rej);
+            if (p && p.catch) p.catch(() => {}); // a versão com Promise também rejeita: já tratamos acima
+          });
+        } catch (e) {}
+      }
+    }
+
+    // Marca os botões fixos do app com o som que devem tocar ao toque
+    function applySoundHooks() {
+      const mark = (sel, snd) => document.querySelectorAll(sel).forEach(el => { el.setAttribute('data-snd', snd); });
+      mark('#screen-home button[onclick^="openApp"]', 'menuOpen');
+      mark('.screen button[onclick="goHome()"]', 'menuClose');
+      mark('button[onclick^="openPicker"]', 'menuOpen');
+      mark('button[onclick="openTagManager()"]', 'menuOpen');
+      mark('button[onclick^="closeEditModal"], button[onclick^="closeTimeEdit"], button[onclick^="closeTagManager"], button[onclick^="closePicker"]', 'menuClose');
+      mark('.filter-btn', 'scroll');
     }
 
     function stopSound(name) {
@@ -763,15 +864,9 @@
     }
 
     function playFallback(name) {
-      const path = SOUND_PATHS[name];
-      if (!path) return;
+      const a = fallbackAudio[name];
+      if (!a) return;
       try {
-        let a = fallbackAudio[name];
-        if (!a) {
-          a = new Audio(encodeURI(path));
-          a.loop = false;
-          fallbackAudio[name] = a;
-        }
         a.pause();
         a.currentTime = 0;
         a.play().catch(() => {});
@@ -782,11 +877,16 @@
     function playNookSound(name) {
       if (soundMuted) return;
 
-      // Som de rolagem: no máximo 1 a cada 120ms (evita empilhar ao tocar rápido)
       if (name === 'scroll') {
-        const now = Date.now();
-        if (now - lastScrollSound < 120) return;
-        lastScrollSound = now;
+        // no máximo 1 a cada 120ms (evita empilhar ao tocar rápido)
+        const t = Date.now();
+        if (t - lastScrollSound < 120) return;
+        lastScrollSound = t;
+      } else {
+        // o toque (pointerdown) e o clique do mesmo botão não tocam duas vezes
+        const t = performance.now();
+        if (t - (lastPlayed[name] || -1e9) < 280) return;
+        lastPlayed[name] = t;
       }
 
       if (audioCtx && bufferCache[name]) {
@@ -815,7 +915,7 @@
       if (soundMuted) stopAllSounds();
       updateSoundUI();
       setSwitch('soundSwitch', !soundMuted);
-      showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'nookTritone');
+      showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'appStart');
     }
 
     // Alto-falante com ondas (ligado) ou com X (mutado) — mesma cor dos outros ícones da barra
@@ -943,7 +1043,7 @@
     // 4. NAVEGAÇÃO ENTRE APLICATIVOS
     // ==========================================
     function openApp(screenId, label) {
-      playNookSound('appStart');
+      playNookSound('menuOpen');
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
       document.getElementById('footerPillText').textContent = `${label} • Toque para Home`;
@@ -997,13 +1097,19 @@
     let timerInterval = null;
     let timerStart = null;
 
+    function setTimerButton(running) {
+      const btn = document.getElementById('btnToggleTimer');
+      btn.className = 'w-full font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5 ' +
+        (running ? 'bg-[#ee7b6d] text-white' : 'bg-[#88d4ab] text-[#2d4739]');
+      btn.innerHTML = svgIcon(running ? 'square' : 'play', 'w-3.5 h-3.5', 'currentColor') + (running ? 'Parar e Carimbar' : 'Iniciar Timer');
+    }
+
     function toggleTimer() {
       const btn = document.getElementById('btnToggleTimer');
       if (!timerInterval) {
         playNookSound('flag');
         timerStart = Date.now();
-        btn.textContent = "⏹ Parar e Carimbar";
-        btn.className = "w-full bg-[#ee7b6d] text-white font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform";
+        setTimerButton(true);
         timerInterval = setInterval(() => {
           const diffSec = Math.floor((Date.now() - timerStart) / 1000);
           const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
@@ -1015,8 +1121,7 @@
         clearInterval(timerInterval);
         timerInterval = null;
         const elapsedMin = (Date.now() - timerStart) / 60000;
-        btn.textContent = "▶ Iniciar Timer";
-        btn.className = "w-full bg-[#88d4ab] text-[#2d4739] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform";
+        setTimerButton(false);
         document.getElementById('timerDisplay').textContent = "00:00:00";
         storeTimeEntry(roundTo5(elapsedMin));
       }
@@ -1061,6 +1166,48 @@
       tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>'
     };
 
+    // ---- Ícones simples de uma cor (usados no lugar de emojis) ----
+    Object.assign(ICONS, {
+      chevleft: '<path d="m15 18-6-6 6-6"/>',
+      pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+      play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+      square: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+      plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+      image: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+      video: '<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+      refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+      alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      cloud: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+      plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+      smartphone: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+      database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+      flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+      star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+      zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+      sprout: '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>',
+      cap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+      heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+      music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+      coffee: '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+      moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+      sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+      code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      palette: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>',
+      home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+      target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+      bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'
+    });
+
+    // Troca os <span data-icon="..."> do HTML pelo SVG correspondente
+    function hydrateIcons(root) {
+      (root || document).querySelectorAll('[data-icon]:not([data-done])').forEach(el => {
+        const paths = ICONS[el.getAttribute('data-icon')];
+        if (!paths) return;
+        el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
+        el.setAttribute('data-done', '1');
+      });
+    }
+
     // ---- Tags do Timer (salvas no aparelho; dá pra criar e apagar) ----
     const TAG_PALETTE = [
       { bg: 'rgb(156,180,216)', color: 'rgb(44,74,107)' },
@@ -1071,16 +1218,19 @@
       { bg: 'rgb(205,180,219)', color: 'rgb(63,46,76)' }
     ];
     const DEFAULT_TAGS = [
-      { name: 'Acadêmico', emoji: '📚', c: 0, icon: 'book' },
-      { name: 'Pesquisa', emoji: '🔬', c: 1, icon: 'flask' },
-      { name: 'Trabalho', emoji: '🛠️', c: 2, icon: 'briefcase' },
-      { name: 'Bem-estar', emoji: '🧘‍♀️', c: 3, icon: 'leaf' }
+      { name: 'Acadêmico', c: 0, icon: 'book' },
+      { name: 'Pesquisa', c: 1, icon: 'flask' },
+      { name: 'Trabalho', c: 2, icon: 'briefcase' },
+      { name: 'Bem-estar', c: 3, icon: 'leaf' }
     ];
 
     function getTags() {
       try {
         const raw = JSON.parse(localStorage.getItem('nook_tags'));
-        if (Array.isArray(raw) && raw.length) return raw;
+        // tags antigas guardavam emoji: aqui ele é descartado e só o ícone fica
+        if (Array.isArray(raw) && raw.length) {
+          return raw.map(t => ({ name: t.name, c: t.c || 0, icon: (t.icon && ICONS[t.icon]) ? t.icon : 'tag' }));
+        }
       } catch (e) {}
       return DEFAULT_TAGS.map(t => ({ ...t }));
     }
@@ -1100,7 +1250,7 @@
     function tagOptions() {
       return getTags().map(t => {
         const p = TAG_PALETTE[t.c % TAG_PALETTE.length];
-        return { value: t.name, label: (t.emoji ? t.emoji + ' ' : '') + t.name, icon: t.icon || 'tag', bg: p.bg, color: p.color };
+        return { value: t.name, label: t.name, icon: t.icon || 'tag', bg: p.bg, color: p.color };
       });
     }
 
@@ -1172,7 +1322,7 @@
       pickerState = { id, opts, onChange: cfg.onChange };
       document.getElementById('pickerTitle').textContent = cfg.title;
       document.getElementById('pickerList').innerHTML = opts.map((o, i) => navRow({
-        onclick: `pickOption(${i})`,
+        onclick: `pickOption(${i})`, snd: 'select',
         bg: o.bg || 'rgb(224,218,202)', color: o.color || 'rgb(140,123,107)', icon: o.icon || 'tag',
         title: o.label,
         actionHtml: o.value === current ? svgIcon('check', 'w-4 h-4 flex-shrink-0', 'rgb(45,95,63)') : '',
@@ -1214,15 +1364,38 @@
         const trash = `<button onclick="deleteTag(${i})" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar tag">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
         return navRow({
           bg: p.bg, color: p.color, icon: t.icon || 'tag',
-          title: (t.emoji ? t.emoji + ' ' : '') + t.name,
+          title: t.name,
           actionHtml: trash, chevron: false
         });
       }).join('');
     }
 
+    const TAG_ICON_CHOICES = ['cap', 'book', 'flask', 'briefcase', 'leaf', 'heart', 'star', 'music', 'coffee', 'moon', 'sun', 'code', 'palette', 'home', 'flame', 'target', 'bulb', 'pencil'];
+    let newTagIcon = 'cap';
+
+    function nextTagColor() {
+      const tags = getTags();
+      return (Math.max(-1, ...tags.map(t => t.c || 0)) + 1) % TAG_PALETTE.length;
+    }
+
+    function renderTagIconGrid() {
+      const p = TAG_PALETTE[nextTagColor()];
+      document.getElementById('tagIconGrid').innerHTML = TAG_ICON_CHOICES.map(n => {
+        const sel = n === newTagIcon;
+        const style = sel ? `background-color:${p.bg};color:${p.color};border:2px solid ${p.color}` : 'color:#8c7b6b';
+        return `<button type="button" onclick="selectTagIcon('${n}')" data-snd="select" title="${n}" class="aspect-square rounded-xl flex items-center justify-center ${sel ? '' : 'bg-white/60 border border-[#e0daca]'} active:scale-90 transition-transform" style="${style}">${svgIcon(n, 'w-5 h-5', 'currentColor')}</button>`;
+      }).join('');
+    }
+
+    function selectTagIcon(name) {
+      newTagIcon = name;
+      renderTagIconGrid();
+    }
+
     function openTagManager() {
       playNookSound('menuOpen');
       renderTagManager();
+      renderTagIconGrid();
       document.getElementById('tagModal').classList.remove('hidden');
     }
 
@@ -1233,7 +1406,6 @@
 
     function addTag() {
       const nameEl = document.getElementById('newTagName');
-      const emojiEl = document.getElementById('newTagEmoji');
       const name = nameEl.value.trim().slice(0, 18);
       if (!name) return showNookToast('Dê um nome para a tag!', 'media/AC_clock.png', 'redo');
 
@@ -1241,14 +1413,14 @@
       if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
         return showNookToast('Essa tag já existe!', 'media/AC_clock.png', 'redo');
       }
-      const nextColor = (Math.max(-1, ...tags.map(t => t.c || 0)) + 1) % TAG_PALETTE.length;
-      tags.push({ name, emoji: emojiEl.value.trim(), c: nextColor, icon: 'tag' });
+      tags.push({ name, c: nextTagColor(), icon: newTagIcon });
       saveTags(tags);
 
       nameEl.value = '';
-      emojiEl.value = '';
+      nameEl.blur();
       populateCategorySelects(name);
       renderTagManager();
+      renderTagIconGrid();
       showNookToast(`Tag "${name}" criada!`, 'media/AC_clock.png', 'stamp');
     }
 
@@ -1280,12 +1452,12 @@
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}" style="color:${color}">${ICONS[name]}</svg>`;
     }
 
-    function navRow({ onclick = '', bg, color, icon, thumb = '', title, subtitle = '', actionHtml = '', chevron = true }) {
+    function navRow({ onclick = '', bg, color, icon, thumb = '', title, subtitle = '', actionHtml = '', chevron = true, snd = '' }) {
       const lead = thumb
         ? `<img src="${esc(thumb)}" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt="">`
         : `<div class="rounded-lg p-1.5 flex-shrink-0" style="background-color:${bg}">${svgIcon(icon, 'w-6 h-6', color)}</div>`;
       return `
-        <div ${onclick ? `onclick="${onclick}"` : ''} class="animate-fade-in-up-slow w-full bg-white/60 ${onclick ? 'active:bg-white/90 cursor-pointer' : ''} rounded-xl p-2 flex items-center gap-2.5 shadow-sm text-left">
+        <div ${onclick ? `onclick="${onclick}"` : ''} ${snd ? `data-snd="${snd}"` : ''} class="animate-fade-in-up-slow w-full bg-white/60 ${onclick ? 'active:bg-white/90 cursor-pointer' : ''} rounded-xl p-2 flex items-center gap-2.5 shadow-sm text-left">
           ${lead}
           <div class="flex-1 min-w-0">
             <div class="text-xs font-bold text-[#3d3d3d] truncate">${esc(title)}</div>
@@ -1407,13 +1579,13 @@
         document.getElementById('sumYear').textContent = `${yearSum}m`;
 
         const tags = [];
-        if (dayTotal >= 360) tags.push("⚡ Alta Densidade (+25%)");
-        if (streak >= 3) tags.push(`🔥 Streak ${streak}d`);
-        if ((catTotals["Pesquisa"] || 0) >= 120) tags.push("🔬 Foco Pesquisa");
-        if ((catTotals["Bem-estar"] || 0) >= 30) tags.push("🌿 Equilíbrio");
-        if (tags.length === 0) tags.push("🌱 Dia em Construção");
+        if (dayTotal >= 360) tags.push({ i: 'zap', t: 'Alta Densidade (+25%)' });
+        if (streak >= 3) tags.push({ i: 'flame', t: `Streak ${streak}d` });
+        if ((catTotals["Pesquisa"] || 0) >= 120) tags.push({ i: 'flask', t: 'Foco Pesquisa' });
+        if ((catTotals["Bem-estar"] || 0) >= 30) tags.push({ i: 'leaf', t: 'Equilíbrio' });
+        if (tags.length === 0) tags.push({ i: 'sprout', t: 'Dia em Construção' });
         document.getElementById('autoTags').innerHTML = tags
-          .map(t => `<span class="bg-[#f5f0e8] border border-[#e0daca] px-2.5 py-1 rounded-full text-[11px] font-bold text-[#3d3d3d]">${t}</span>`)
+          .map(t => `<span class="bg-[#f5f0e8] border border-[#e0daca] px-2.5 py-1 rounded-full text-[11px] font-bold text-[#3d3d3d] inline-flex items-center gap-1">${svgIcon(t.i, 'w-3 h-3', '#8c7b6b')}${esc(t.t)}</span>`)
           .join('');
 
         renderCalendar(mapByDate);
@@ -1440,7 +1612,7 @@
         const border = isSel ? 'border-2 border-[#3d3d3d]' : 'border border-[#e0daca]';
         const ring = (isToday && !isSel) ? 'ring-2 ring-[#f7b299]' : '';
         html += `
-          <button onclick="selectDay('${iso}')" class="h-11 rounded-xl flex flex-col items-center justify-center leading-none ${border} ${ring}" style="background:${heatColor(min)}">
+          <button onclick="selectDay('${iso}')" data-snd="select" class="h-11 rounded-xl flex flex-col items-center justify-center leading-none ${border} ${ring}" style="background:${heatColor(min)}">
             <span class="text-[11px] font-bold text-[#3d3d3d]">${d}</span>
             <span class="text-[8px] font-bold text-[#5a4b3c] mt-0.5">${min ? fmtMin(min) : '&nbsp;'}</span>
           </button>`;
@@ -1580,8 +1752,8 @@
       document.getElementById('delayBox').style.visibility = (mode === 'agendado') ? 'visible' : 'hidden';
     }
 
-    function showMediaInfo(text) {
-      document.getElementById('mediaInfoText').textContent = text;
+    function showMediaInfo(text, icon) {
+      document.getElementById('mediaInfoText').innerHTML = svgIcon(icon || 'image', 'w-3.5 h-3.5 flex-shrink-0', 'currentColor') + '<span class="truncate">' + esc(text) + '</span>';
       document.getElementById('mediaInfo').classList.remove('hidden');
     }
 
@@ -1596,6 +1768,7 @@
 
     // Recebe o arquivo tanto do botão "Tirar agora" quanto do "Enviar"
     function handleMedia(event) {
+      scheduleHeightFix(); // o seletor de arquivos tira o app da tela cheia
       const input = event.target;
       const file = input.files && input.files[0];
       if (!file) return;
@@ -1629,7 +1802,7 @@
           const preview = document.getElementById('photoPreview');
           preview.src = currentThumbBase64;
           preview.classList.remove('hidden');
-          showMediaInfo('📷 ' + (file.name || 'foto'));
+          showMediaInfo(file.name || 'foto', 'camera');
           showNookToast('Foto pronta!', 'media/AC_camera.png', 'enter');
         };
         img.onerror = () => showNookToast('Não consegui ler essa imagem', 'media/AC_camera.png', 'redo');
@@ -1658,7 +1831,7 @@
           } else {
             preview.classList.add('hidden');
           }
-          showMediaInfo(`🎬 vídeo • ${mb.toFixed(1)}MB`);
+          showMediaInfo(`vídeo • ${mb.toFixed(1)}MB`, 'video');
           showNookToast('Vídeo pronto!', 'media/AC_camera.png', 'enter');
         });
       };
@@ -1775,7 +1948,7 @@
       }
 
       playNookSound('wait');
-      container.innerHTML = `<p>⏳ Buscando acervo no VPS...</p>`;
+      container.innerHTML = `<p class="flex items-center gap-1.5">${svgIcon('refresh', 'w-3.5 h-3.5 animate-spin', 'currentColor')}Buscando acervo no VPS...</p>`;
 
       try {
         await syncQueueWithVPS(false);
@@ -1841,7 +2014,7 @@
 
       playNookSound('menuOpen');
       editSource = 'vps';
-      document.getElementById('editModalTitle').textContent = '✏️ Editar Registro do VPS';
+      document.getElementById('editModalTitle').textContent = 'Editar Registro do VPS';
       document.getElementById('editPostId').value = item.id;
       setSelectValue('editStatus', item.status === 'cancelado' ? 'rascunho' : item.status);
       document.getElementById('editScheduledDate').value = item.scheduled_post_date;
@@ -1865,7 +2038,7 @@
         if (!it) return;
         playNookSound('menuOpen');
         editSource = 'local';
-        document.getElementById('editModalTitle').textContent = '✏️ Editar item da fila';
+        document.getElementById('editModalTitle').textContent = 'Editar item da fila';
         document.getElementById('editPostId').value = it.id;
         setSelectValue('editStatus', it.status === 'rascunho' ? 'rascunho' : 'agendado');
         document.getElementById('editScheduledDate').value = it.scheduled_post_date || '';
@@ -2008,7 +2181,7 @@
       autoSync = !autoSync;
       try { localStorage.setItem('nook_autosync', autoSync); } catch (e) {}
       setSwitch('autoSyncSwitch', autoSync);
-      showNookToast(autoSync ? 'Sincronia automática ligada' : 'Sincronia automática desligada', 'media/AC_settings.png', 'select');
+      showNookToast(autoSync ? 'Sincronia automática ligada' : 'Sincronia automática desligada', 'media/AC_settings.png', autoSync ? 'appStart' : 'select');
       if (autoSync && navigator.onLine) syncQueueWithVPS(false);
     }
 
@@ -2128,22 +2301,22 @@
           return;
         }
 
-        const label = (t) => `<div class="text-[10px] font-bold uppercase text-[#8c7b6b] px-1 pt-1">${t}</div>`;
+        const label = (t, ic) => `<div class="flex items-center gap-1 text-[10px] font-bold uppercase text-[#8c7b6b] px-1 pt-1">${svgIcon(ic, 'w-3 h-3', 'currentColor')}${t}</div>`;
         let html = '';
 
         if (posts.length) {
-          html += label('📸 Postagens') + posts.map(p => navRow({
+          html += label('Postagens', 'camera') + posts.map(p => navRow({
             onclick: `openLocalEdit('${p.id}')`,
-            bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'camera',
+            bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: p.media_type === 'video' ? 'video' : 'camera',
             thumb: p.thumb_base64,
-            title: (p.media_type === 'video' ? '🎬 ' : '') + (p.caption || 'Sem legenda'),
+            title: p.caption || 'Sem legenda',
             subtitle: `${p.status} • ${fmtBR(p.date_occurred)} → ${fmtBR(p.scheduled_post_date)}`,
             actionHtml: `<button onclick="event.stopPropagation(); deleteLocalPost('${p.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`
           })).join('');
         }
 
         if (times.length) {
-          html += label('⏱️ Registros de tempo') + times.map(t => {
+          html += label('Registros de tempo', 'clock') + times.map(t => {
             const st = catStyle(t.category);
             const state = t.deleted ? 'apagado' : (t.dirty ? 'editado' : 'novo');
             const trash = t.deleted ? '' : `<button onclick="event.stopPropagation(); deleteTimeEntry('${t.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
@@ -2242,6 +2415,7 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => { if (reg && reg.update) reg.update(); }).catch(() => {});
     }
+    hydrateIcons();
     initSettings();
     populateCategorySelects();
     initSounds();
