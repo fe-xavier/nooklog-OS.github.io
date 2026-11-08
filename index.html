@@ -804,6 +804,15 @@
     let SOUND_GAIN = parseFloat(localStorage.getItem('nook_gain')) || 1.7;
     // Tempo máximo (ms) de certos sons — corta qualquer som que ficaria "preso" tocando
     const SOUND_MAX_MS = { scroll: 350 };
+    // Sons cujo arquivo traz um segundo som "colado" no final. 'auto' acha o ponto de corte sozinho;
+    // ou coloque um número em ms (ex.: menuOpen: 220) para cortar exatamente ali.
+    const SOUND_TRIM_MS = { menuOpen: 'auto' };
+    const autoTrimMs = {};
+    function trimFor(name) {
+      const v = SOUND_TRIM_MS[name];
+      if (typeof v === 'number') return v > 0 ? v : 0;
+      return v === 'auto' ? (autoTrimMs[name] || 0) : 0;
+    }
 
     let soundMuted = localStorage.getItem('nook_muted') === 'true';
     let audioCtx = null;
@@ -881,8 +890,39 @@
             const p = audioCtx.decodeAudioData(data, res, rej);
             if (p && p.catch) p.catch(() => {}); // a versão com Promise também rejeita: já tratamos acima
           });
+          analyzeTrim(key, bufferCache[key]);
         } catch (e) {}
       }
+    }
+
+    // Procura, dentro do arquivo de áudio, um vale de silêncio seguido de um novo som: corta ali
+    function analyzeTrim(key, buf) {
+      if (SOUND_TRIM_MS[key] !== 'auto') return;
+      try {
+        const data = buf.getChannelData(0);
+        const win = Math.max(1, Math.round(buf.sampleRate * 0.01)); // janelas de 10 ms
+        const n = Math.floor(data.length / win);
+        const rms = [];
+        for (let i = 0; i < n; i++) {
+          let a = 0;
+          for (let k = 0; k < win; k++) { const v = data[i * win + k]; a += v * v; }
+          rms.push(Math.sqrt(a / win));
+        }
+        const peak = Math.max(...rms);
+        if (!peak) return;
+        if (DEBUG_SOUND) debugLine(key + ' envelope(10ms): ' + rms.map(v => Math.min(9, Math.round(v / peak * 9))).join(''));
+        const hi = 0.15 * peak, lo = 0.10 * peak;
+        const start = rms.findIndex(v => v > hi);
+        if (start < 0) return;
+        for (let j = start; j + 2 < n; j++) {
+          if (rms[j] < lo && rms[j + 1] < lo && rms[j + 2] < lo) {
+            let k = j + 3;
+            while (k < n && rms[k] < hi) k++;
+            if (k < n) autoTrimMs[key] = (j + 1) * 10; // há um segundo som depois do vale
+            break;
+          }
+        }
+      } catch (e) {}
     }
 
     // Marca os botões fixos do app com o som que devem tocar ao toque
@@ -918,25 +958,30 @@
         a.pause();
         a.currentTime = 0;
         a.play().catch(() => {});
-        if (SOUND_MAX_MS[name]) setTimeout(() => { try { a.pause(); } catch (e) {} }, SOUND_MAX_MS[name]);
+        const lim = SOUND_MAX_MS[name] || trimFor(name);
+        if (lim) setTimeout(() => { try { a.pause(); } catch (e) {} }, lim);
       } catch (e) {}
     }
 
     // Diagnóstico: abra o app com ?debugsound no final do endereço para ver, na tela, cada som tocado
     const DEBUG_SOUND = /debugsound/.test(location.search);
-    function logSound(name, how) {
+    function debugLine(line) {
       if (!DEBUG_SOUND) return;
       let box = document.getElementById('soundDebug');
       if (!box) {
         box = document.createElement('div');
         box.id = 'soundDebug';
-        box.style.cssText = 'position:fixed;top:4px;left:4px;z-index:99;background:rgba(0,0,0,.78);color:#fff;font:10px monospace;padding:4px 6px;border-radius:6px;max-width:94%;pointer-events:none;white-space:pre';
+        box.style.cssText = 'position:fixed;top:4px;left:4px;z-index:99;background:rgba(0,0,0,.78);color:#fff;font:10px monospace;padding:4px 6px;border-radius:6px;max-width:94%;pointer-events:none;white-space:pre-wrap;word-break:break-all';
         document.body.appendChild(box);
       }
+      box.textContent = ((box.textContent ? box.textContent + '\n' : '') + line).split('\n').slice(-8).join('\n');
+    }
+
+    function logSound(name, how) {
+      if (!DEBUG_SOUND) return;
       const buf = bufferCache[name];
-      const line = `${Math.round(performance.now()) % 100000}ms ${name} ${how}${buf ? ' ' + buf.duration.toFixed(2) + 's' : ''} ${(SOUND_PATHS[name] || '').split('/').pop()}`;
-      box.textContent = (box.textContent ? box.textContent + '\n' : '') + line;
-      box.textContent = box.textContent.split('\n').slice(-8).join('\n');
+      const cut = trimFor(name);
+      debugLine(`${Math.round(performance.now()) % 100000}ms ${name} ${how}${buf ? ' ' + buf.duration.toFixed(2) + 's' : ''}${cut ? ' corte=' + cut + 'ms' : ''} ${(SOUND_PATHS[name] || '').split('/').pop()}`);
     }
 
     function playNookSound(name) {
@@ -967,10 +1012,22 @@
           const src = audioCtx.createBufferSource();
           src.buffer = bufferCache[name];
           src.loop = false;
-          src.connect(masterGain);
+          const trim = trimFor(name);
+          if (trim) {
+            // corta o som no ponto certo, com um fade curtinho para não estalar
+            const g = audioCtx.createGain();
+            const endAt = audioCtx.currentTime + trim / 1000;
+            g.gain.setValueAtTime(1, Math.max(audioCtx.currentTime, endAt - 0.02));
+            g.gain.linearRampToValueAtTime(0, endAt);
+            src.connect(g);
+            g.connect(masterGain);
+          } else {
+            src.connect(masterGain);
+          }
           src.onended = () => { if (activeSources[name] === src) delete activeSources[name]; };
           activeSources[name] = src;
           src.start(0);
+          if (trim) src.stop(audioCtx.currentTime + trim / 1000 + 0.01);
           logSound(name, 'webaudio');
           if (SOUND_MAX_MS[name]) {
             setTimeout(() => { try { src.stop(); } catch (e) {} }, SOUND_MAX_MS[name]);
