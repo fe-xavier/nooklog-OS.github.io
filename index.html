@@ -32,6 +32,7 @@
     .screen.active { display: block; animation: fadeInUpSlow 0.22s ease-out; }
 
     input, select, textarea { user-select: text; }
+    #screen-home { margin-top: auto; margin-bottom: auto; }
   </style>
 </head>
 <body class="bg-[#e4decb] min-h-screen flex items-center justify-center p-0 sm:p-4 overflow-hidden">
@@ -55,10 +56,9 @@
       <!-- Relógio e Data Central -->
       <div class="text-center cursor-pointer" onclick="goHome()">
         <div class="flex items-center justify-center gap-1 leading-none">
-          <span id="clockTime" class="text-lg font-bold text-[#c7beaa]">9:17</span>
-          <span id="clockAmPm" class="text-xs font-bold text-[#c7beaa]">PM</span>
+          <span id="clockTime" class="text-lg font-bold text-[#c7beaa]">21:17</span>
         </div>
-        <div id="clockDate" class="text-[11px] font-bold text-[#c7beaa] tracking-wide mt-0.5">SATURDAY, NOV. 7</div>
+        <div id="clockDate" class="text-[11px] font-bold text-[#c7beaa] tracking-wide mt-0.5">SÁBADO, 7 NOV.</div>
       </div>
 
       <!-- Som: alto-falante ligado / mutado (Direita) -->
@@ -77,19 +77,19 @@
     </div>
 
     <!-- BALÃO DE AVISO RÁPIDO (TOAST) -->
-    <div id="nookToast" class="pointer-events-none opacity-0 transition-all duration-300 absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-[#4a443b] text-[#f5f0e8] px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-bold whitespace-nowrap border-2 border-[#e8d4b0]">
-      <img id="toastIcon" src="media/AC_froggychair.png" class="w-4 h-4 rounded-md object-contain" alt="">
-      <span id="toastText">Salvo!</span>
+    <div id="nookToast" class="pointer-events-none opacity-0 transition-all duration-300 absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-[#4a443b] text-[#f5f0e8] px-4 py-1.5 rounded-2xl shadow-lg flex items-center gap-2 text-xs font-bold w-max max-w-[88%] border-2 border-[#e8d4b0]">
+      <img id="toastIcon" src="media/AC_froggychair.png" class="w-4 h-4 rounded-md object-contain flex-shrink-0" alt="">
+      <span id="toastText" class="leading-tight text-left">Salvo!</span>
     </div>
 
     <!-- CORPO PRINCIPAL ROLÁVEL -->
-    <div class="flex-1 overflow-y-auto hide-scrollbar">
+    <div class="flex-1 overflow-y-auto hide-scrollbar flex flex-col">
 
       <!-- ========================================== -->
       <!-- TELA 0: GRADE 3x3 DO NOOKPHONE             -->
       <!-- ========================================== -->
       <section id="screen-home" class="screen active">
-        <div class="flex-1 flex flex-col justify-start px-6 py-[18px]">
+        <div class="px-6 py-[18px]">
           <div class="grid grid-cols-3 gap-x-6 gap-y-5 w-full">
 
             <div class="animate-fade-in-up-slow">
@@ -128,7 +128,7 @@
             </div>
 
             <div class="animate-fade-in-up-slow">
-              <button onclick="openApp('screen-sync', 'Fila & VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+              <button onclick="openApp('screen-queue', 'Fila VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <div class="relative">
                   <img alt="Postagens" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_post.png">
                   <span id="badgeQueue" class="hidden absolute -top-1 -right-1 bg-[#ee7b6d] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
@@ -152,7 +152,7 @@
             </div>
 
             <div class="animate-fade-in-up-slow">
-              <button onclick="openApp('screen-sync', 'Ajustes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+              <button onclick="openApp('screen-settings', 'Ajustes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Ajustes" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_settings.png">
                 <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Ajustes</span>
               </button>
@@ -177,15 +177,15 @@
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3">
           <div class="grid grid-cols-2 gap-2 mb-2.5">
             <div>
-              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Data</label>
+              <div class="h-5 flex items-center"><label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Data</label></div>
               <input type="date" id="timeDate" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 text-[#3d3d3d]">
             </div>
             <div>
-              <div class="flex items-center justify-between">
+              <div class="h-5 flex items-center justify-between">
                 <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Categoria</label>
-                <button type="button" onclick="openTagManager()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2 py-0.5 rounded-full active:scale-95">✏️ Tags</button>
+                <button type="button" onclick="openTagManager()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2 rounded-full leading-4 active:scale-95 transition-transform" title="Gerenciar tags">✏️ Tags</button>
               </div>
-              <select id="timeCategory" onchange="playNookSound('select')" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 text-[#3d3d3d]"></select>
+              <input type="hidden" id="timeCategory" value="Acadêmico"><button type="button" onclick="openPicker('timeCategory')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5  text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="timeCategory_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
             </div>
           </div>
 
@@ -407,17 +407,11 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Status</label>
-              <select id="diarySaveMode" onchange="toggleDelaySelect()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 mt-0.5">
-                <option value="agendado">Agendar Post</option>
-                <option value="rascunho">Rascunho</option>
-              </select>
+              <input type="hidden" id="diarySaveMode" value="agendado"><button type="button" onclick="openPicker('diarySaveMode')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="diarySaveMode_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
             </div>
             <div id="delayBox">
               <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Atraso</label>
-              <select id="diaryDelay" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 mt-0.5">
-                <option value="7">+1 Semana (7d)</option>
-                <option value="30">+1 Mês (30d)</option>
-              </select>
+              <input type="hidden" id="diaryDelay" value="7"><button type="button" onclick="openPicker('diaryDelay')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="diaryDelay_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
             </div>
           </div>
 
@@ -461,32 +455,90 @@
       <!-- ========================================== -->
       <!-- TELA 7: FILA OFFLINE & CONFIGURAÇÃO VPS    -->
       <!-- ========================================== -->
-      <section id="screen-sync" class="screen px-5 py-3">
+      <section id="screen-queue" class="screen px-5 py-3">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
-            <img src="media/AC_settings.png" class="w-7 h-7 object-contain" alt="">
-            <h2 class="text-sm font-bold text-[#3d3d3d]">Sincronia & Webhook</h2>
+            <img src="media/AC_post.png" class="w-7 h-7 object-contain" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Fila de Envio</h2>
           </div>
           <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
         </div>
 
-        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2">
-          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">URL do Webhook no n8n</label>
-          <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nook" onchange="saveWebhookUrl()" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
-
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="syncQueueWithVPS(true)" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95">
-              ☁️ Sincronizar
-            </button>
-            <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95">
-              💾 Backup JSON
-            </button>
-          </div>
+        <div id="queueHint" class="hidden bg-[#fde293] text-[#5a4b3c] text-[11px] font-bold p-2.5 rounded-2xl mb-3">
+          ⚠️ Webhook não configurado. Defina em Ajustes para enviar.
         </div>
 
+        <button onclick="syncQueueWithVPS(true)" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform mb-3">
+          ☁️ Sincronizar agora
+        </button>
+
         <div>
-          <div class="text-xs font-bold text-[#3d3d3d] mb-2 px-1">Fila Local no Aparelho</div>
+          <div class="text-xs font-bold text-[#3d3d3d] mb-2 px-1">Itens no aparelho</div>
           <div id="pendingList" class="text-[11px] text-[#8c7b6b] space-y-2">Nenhum item pendente.</div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 8: AJUSTES (APLICATIVO E ENVIO)       -->
+      <!-- ========================================== -->
+      <section id="screen-settings" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_settings.png" class="w-7 h-7 object-contain" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Ajustes</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <!-- Envio -->
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2.5">
+          <div class="text-xs font-bold text-[#3d3d3d]">☁️ Envio</div>
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">URL do Webhook no n8n</label>
+            <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nook" onchange="saveWebhookUrl()" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5">
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-[#3d3d3d]">Sincronizar sozinho</div>
+              <div class="text-[10px] font-semibold text-[#8c7b6b]">Envia a fila quando houver internet</div>
+            </div>
+            <button id="autoSyncSwitch" onclick="toggleAutoSync()" class="flex-shrink-0 w-11 h-6 rounded-full relative transition-colors bg-[#e0daca]"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"></span></button>
+          </div>
+          <button onclick="testWebhook()" class="w-full bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">🔌 Testar conexão</button>
+        </div>
+
+        <!-- Aplicativo -->
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2.5">
+          <div class="text-xs font-bold text-[#3d3d3d]">📱 Aplicativo</div>
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-xs font-bold text-[#3d3d3d]">Sons</div>
+            <button id="soundSwitch" onclick="toggleMute()" class="flex-shrink-0 w-11 h-6 rounded-full relative transition-colors bg-[#e0daca]"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"></span></button>
+          </div>
+          <div>
+            <div class="flex items-center justify-between">
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Volume dos sons</label>
+              <span id="gainLabel" class="text-[10px] font-bold text-[#8c7b6b]">1.7x</span>
+            </div>
+            <input type="range" id="gainSlider" min="1" max="2.5" step="0.1" value="1.7" oninput="setGain(this.value)" onchange="playNookSound('pointGet')" class="w-full accent-[#88d4ab]">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Atraso padrão do Diário</label>
+            <input type="hidden" id="defaultDelay" value="7"><button type="button" onclick="openPicker('defaultDelay')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="defaultDelay_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Minutos do The Roost</label>
+            <input type="number" id="roostMinutes" min="5" max="240" step="5" value="15" onchange="saveRoostMinutes()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5 text-[#3d3d3d]">
+          </div>
+          <button onclick="openTagManager()" class="w-full bg-[#fde293] text-[#5a4b3c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">🏷️ Tags do Timer</button>
+        </div>
+
+        <!-- Dados -->
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] space-y-2">
+          <div class="text-xs font-bold text-[#3d3d3d]">💾 Dados</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Backup JSON</button>
+            <button onclick="confirmClearCache()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Limpar cache</button>
+          </div>
         </div>
       </section>
 
@@ -500,10 +552,7 @@
 
         <div>
           <label class="text-[10px] font-bold text-[#8c7b6b]">STATUS</label>
-          <select id="editStatus" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
-            <option value="agendado">Agendado para Postar</option>
-            <option value="rascunho">Rascunho (Pausado)</option>
-          </select>
+          <input type="hidden" id="editStatus" value="agendado"><button type="button" onclick="openPicker('editStatus')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2.5 py-1.5  text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="editStatus_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
         </div>
 
         <div>
@@ -542,7 +591,7 @@
 
         <div>
           <label class="text-[10px] font-bold text-[#8c7b6b]">CATEGORIA</label>
-          <select id="timeEditCategory" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5"></select>
+          <input type="hidden" id="timeEditCategory" value="Acadêmico"><button type="button" onclick="openPicker('timeEditCategory')" class="w-full flex items-center justify-between gap-1 text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2.5 py-1.5  text-[#3d3d3d] text-left active:scale-[0.98] transition-transform"><span id="timeEditCategory_label" class="truncate"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 text-[#8c7b6b]"><path d="m6 9 6 6 6-6"/></svg></button>
         </div>
 
         <div>
@@ -573,6 +622,15 @@
         </div>
 
         <button onclick="closeTagManager()" class="w-full mt-2 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
+      </div>
+    </div>
+
+    <!-- SELETOR PRÓPRIO (no lugar da caixa de seleção nativa) -->
+    <div id="pickerModal" class="hidden absolute inset-0 bg-black/40 z-[55] flex items-center justify-center p-4" onclick="if (event.target === this) closePicker()">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl">
+        <h3 id="pickerTitle" class="text-sm font-bold text-[#3d3d3d] mb-2 px-1">Selecionar</h3>
+        <div id="pickerList" class="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar"></div>
+        <button onclick="closePicker()" class="w-full mt-3 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
       </div>
     </div>
 
@@ -643,7 +701,7 @@
 
     // Volume extra: 1.0 = original. O <audio> do navegador não passa de 100%,
     // então os sons passam por Web Audio com ganho + limitador (evita estourar).
-    const SOUND_GAIN = 1.7;
+    let SOUND_GAIN = parseFloat(localStorage.getItem('nook_gain')) || 1.7;
     // Tempo máximo (ms) de certos sons — corta qualquer som que ficaria "preso" tocando
     const SOUND_MAX_MS = { scroll: 350 };
 
@@ -756,6 +814,7 @@
       localStorage.setItem('nook_muted', soundMuted);
       if (soundMuted) stopAllSounds();
       updateSoundUI();
+      setSwitch('soundSwitch', !soundMuted);
       showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'nookTritone');
     }
 
@@ -800,17 +859,14 @@
     // ==========================================
     function updateNookClock() {
       const now = new Date();
-      let hrs = now.getHours();
+      const hrs = String(now.getHours()).padStart(2, '0');
       const mins = String(now.getMinutes()).padStart(2, '0');
-      const ampm = hrs >= 12 ? 'PM' : 'AM';
-      hrs = hrs % 12 || 12;
 
-      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-      const months = ['JAN.', 'FEB.', 'MAR.', 'APR.', 'MAY', 'JUN.', 'JUL.', 'AUG.', 'SEP.', 'OCT.', 'NOV.', 'DEC.'];
+      const days = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
+      const months = ['JAN.', 'FEV.', 'MAR.', 'ABR.', 'MAI.', 'JUN.', 'JUL.', 'AGO.', 'SET.', 'OUT.', 'NOV.', 'DEZ.'];
 
       document.getElementById('clockTime').textContent = `${hrs}:${mins}`;
-      document.getElementById('clockAmPm').textContent = ampm;
-      document.getElementById('clockDate').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+      document.getElementById('clockDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
     }
     setInterval(updateNookClock, 1000);
     updateNookClock();
@@ -892,7 +948,8 @@
       document.getElementById(screenId).classList.add('active');
       document.getElementById('footerPillText').textContent = `${label} • Toque para Home`;
       if (screenId === 'screen-stats' || screenId === 'screen-scale' || screenId === 'screen-records') renderStats();
-      if (screenId === 'screen-sync') renderPendingQueue();
+      if (screenId === 'screen-queue') renderPendingQueue();
+      if (screenId === 'screen-settings') initSettings();
       if (screenId === 'screen-archive') fetchVPSArchive();
     }
 
@@ -906,7 +963,7 @@
 
     function quickWellbeingStamp() {
       document.getElementById('timeDate').value = todayISO();
-      storeTimeEntry(15, 'Bem-estar');
+      storeTimeEntry(getRoostMinutes(), 'Bem-estar');
     }
 
     // ==========================================
@@ -997,6 +1054,10 @@
       trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
       x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
       chevron: '<path d="m9 18 6-6-6-6"/>',
+      check: '<path d="M20 6 9 17l-5-5"/>',
+      calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+      file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+      clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
       tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>'
     };
 
@@ -1036,17 +1097,114 @@
       return { bg: p.bg, color: p.color, icon: t.icon || 'tag' };
     }
 
-    function tagOptionsHtml(tags) {
-      return tags.map(t => `<option value="${esc(t.name)}">${esc((t.emoji ? t.emoji + ' ' : '') + t.name)}</option>`).join('');
+    function tagOptions() {
+      return getTags().map(t => {
+        const p = TAG_PALETTE[t.c % TAG_PALETTE.length];
+        return { value: t.name, label: (t.emoji ? t.emoji + ' ' : '') + t.name, icon: t.icon || 'tag', bg: p.bg, color: p.color };
+      });
+    }
+
+    // ---- Seletor próprio (no lugar da caixa de seleção nativa do navegador) ----
+    const OPT_YELLOW = { bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)' };
+    const OPT_LILAC = { bg: 'rgb(205,180,219)', color: 'rgb(63,46,76)' };
+    const OPT_BLUE = { bg: 'rgb(126,200,227)', color: 'rgb(26,95,122)' };
+    let editCatExtra = null; // categoria já apagada que ainda precisa aparecer ao editar um registro antigo
+
+    const statusOptions = () => [
+      { value: 'agendado', label: 'Agendar Post', icon: 'calendar', ...OPT_YELLOW },
+      { value: 'rascunho', label: 'Rascunho', icon: 'file', ...OPT_LILAC }
+    ];
+    const delayOptions = () => [
+      { value: '7', label: '+1 Semana (7d)', icon: 'clock', ...OPT_BLUE },
+      { value: '30', label: '+1 Mês (30d)', icon: 'clock', ...OPT_BLUE }
+    ];
+
+    const PICKERS = {
+      timeCategory: { title: 'Categoria', options: tagOptions },
+      timeEditCategory: {
+        title: 'Categoria',
+        options: () => {
+          const o = tagOptions();
+          if (editCatExtra && !o.some(x => x.value === editCatExtra)) {
+            o.push({ value: editCatExtra, label: editCatExtra, icon: 'tag', bg: 'rgb(224,218,202)', color: 'rgb(140,123,107)' });
+          }
+          return o;
+        }
+      },
+      diarySaveMode: { title: 'Status', options: statusOptions, onChange: () => toggleDelaySelect() },
+      diaryDelay: { title: 'Atraso', options: delayOptions },
+      editStatus: { title: 'Status', options: statusOptions },
+      defaultDelay: {
+        title: 'Atraso padrão do Diário',
+        options: delayOptions,
+        onChange: (v) => {
+          try { localStorage.setItem('nook_default_delay', v); } catch (e) {}
+          setSelectValue('diaryDelay', v);
+        }
+      }
+    };
+
+    function refreshSelectBtn(id) {
+      const cfg = PICKERS[id];
+      const input = document.getElementById(id);
+      const label = document.getElementById(id + '_label');
+      if (!cfg || !input || !label) return;
+      const opt = cfg.options().find(o => o.value === input.value);
+      label.textContent = opt ? opt.label : (input.value || 'Selecionar');
+    }
+
+    function refreshAllSelects() {
+      Object.keys(PICKERS).forEach(refreshSelectBtn);
+    }
+
+    function setSelectValue(id, value) {
+      document.getElementById(id).value = value;
+      refreshSelectBtn(id);
+    }
+
+    let pickerState = null;
+
+    function openPicker(id) {
+      const cfg = PICKERS[id];
+      if (!cfg) return;
+      const opts = cfg.options();
+      const current = document.getElementById(id).value;
+      pickerState = { id, opts, onChange: cfg.onChange };
+      document.getElementById('pickerTitle').textContent = cfg.title;
+      document.getElementById('pickerList').innerHTML = opts.map((o, i) => navRow({
+        onclick: `pickOption(${i})`,
+        bg: o.bg || 'rgb(224,218,202)', color: o.color || 'rgb(140,123,107)', icon: o.icon || 'tag',
+        title: o.label,
+        actionHtml: o.value === current ? svgIcon('check', 'w-4 h-4 flex-shrink-0', 'rgb(45,95,63)') : '',
+        chevron: false
+      })).join('');
+      playNookSound('menuOpen');
+      document.getElementById('pickerModal').classList.remove('hidden');
+    }
+
+    function pickOption(i) {
+      if (!pickerState) return;
+      const o = pickerState.opts[i];
+      if (!o) return;
+      const { id, onChange } = pickerState;
+      setSelectValue(id, o.value);
+      closePicker(true);
+      playNookSound('select');
+      if (onChange) onChange(o.value);
+    }
+
+    function closePicker(silent) {
+      document.getElementById('pickerModal').classList.add('hidden');
+      pickerState = null;
+      if (silent !== true) playNookSound('menuClose');
     }
 
     function populateCategorySelects(selectName) {
       const tags = getTags();
-      const sel = document.getElementById('timeCategory');
-      const prev = selectName || sel.value;
-      sel.innerHTML = tagOptionsHtml(tags);
-      sel.value = tags.some(t => t.name === prev) ? prev : tags[0].name;
-      document.getElementById('timeEditCategory').innerHTML = tagOptionsHtml(tags);
+      const input = document.getElementById('timeCategory');
+      const prev = selectName || input.value;
+      input.value = tags.some(t => t.name === prev) ? prev : tags[0].name;
+      refreshAllSelects();
     }
 
     function renderTagManager() {
@@ -1335,14 +1493,8 @@
         playNookSound('menuOpen');
         document.getElementById('timeEditId').value = it.id;
         document.getElementById('timeEditDate').value = it.date;
-        const editSel = document.getElementById('timeEditCategory');
-        if (![...editSel.options].some(o => o.value === it.category)) {
-          const o = document.createElement('option');
-          o.value = it.category;
-          o.textContent = it.category;
-          editSel.appendChild(o);
-        }
-        editSel.value = it.category;
+        editCatExtra = it.category;
+        setSelectValue('timeEditCategory', it.category);
         document.getElementById('timeEditMinutes').value = it.minutes;
         document.getElementById('timeEditModal').classList.remove('hidden');
       };
@@ -1381,6 +1533,7 @@
         document.getElementById('timeEditModal').classList.add('hidden');
         showNookToast('Atividade atualizada!', 'media/AC_clock.png', 'stamp');
         updateQueueCounter();
+        renderPendingQueue();
         setSelectedDate(date);
       };
     }
@@ -1407,6 +1560,7 @@
       tx.oncomplete = () => {
         showNookToast('Atividade apagada!', 'media/AC_post.png', 'postDelete');
         updateQueueCounter();
+        renderPendingQueue();
         renderStats();
       };
     }
@@ -1587,7 +1741,7 @@
         document.getElementById('diaryLocation').value = '';
         clearMedia();
         updateQueueCounter();
-        if (navigator.onLine) syncQueueWithVPS(false);
+        if (navigator.onLine && autoSync) syncQueueWithVPS(false);
       };
     }
 
@@ -1689,7 +1843,7 @@
       editSource = 'vps';
       document.getElementById('editModalTitle').textContent = '✏️ Editar Registro do VPS';
       document.getElementById('editPostId').value = item.id;
-      document.getElementById('editStatus').value = item.status === 'cancelado' ? 'rascunho' : item.status;
+      setSelectValue('editStatus', item.status === 'cancelado' ? 'rascunho' : item.status);
       document.getElementById('editScheduledDate').value = item.scheduled_post_date;
       document.getElementById('editLocation').value = item.location || '';
       document.getElementById('editCaption').value = item.caption || '';
@@ -1713,7 +1867,7 @@
         editSource = 'local';
         document.getElementById('editModalTitle').textContent = '✏️ Editar item da fila';
         document.getElementById('editPostId').value = it.id;
-        document.getElementById('editStatus').value = it.status === 'rascunho' ? 'rascunho' : 'agendado';
+        setSelectValue('editStatus', it.status === 'rascunho' ? 'rascunho' : 'agendado');
         document.getElementById('editScheduledDate').value = it.scheduled_post_date || '';
         document.getElementById('editLocation').value = it.location || '';
         document.getElementById('editCaption').value = it.caption || '';
@@ -1841,6 +1995,88 @@
     // ==========================================
     // 9. SINCRONIZAÇÃO OFFLINE -> VPS
     // ==========================================
+    let autoSync = localStorage.getItem('nook_autosync') !== 'false';
+
+    function setSwitch(id, on) {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.className = 'flex-shrink-0 w-11 h-6 rounded-full relative transition-colors ' + (on ? 'bg-[#88d4ab]' : 'bg-[#e0daca]');
+      if (b.firstElementChild) b.firstElementChild.style.transform = on ? 'translateX(20px)' : 'translateX(0)';
+    }
+
+    function toggleAutoSync() {
+      autoSync = !autoSync;
+      try { localStorage.setItem('nook_autosync', autoSync); } catch (e) {}
+      setSwitch('autoSyncSwitch', autoSync);
+      showNookToast(autoSync ? 'Sincronia automática ligada' : 'Sincronia automática desligada', 'media/AC_settings.png', 'select');
+      if (autoSync && navigator.onLine) syncQueueWithVPS(false);
+    }
+
+    function setGain(value) {
+      const v = Math.min(2.5, Math.max(1, parseFloat(value) || 1.7));
+      SOUND_GAIN = v;
+      if (masterGain) masterGain.gain.value = v;
+      try { localStorage.setItem('nook_gain', v); } catch (e) {}
+      document.getElementById('gainLabel').textContent = v.toFixed(1) + 'x';
+    }
+
+    function getRoostMinutes() {
+      return parseInt(localStorage.getItem('nook_roost_min')) || 15;
+    }
+
+    function saveRoostMinutes() {
+      const input = document.getElementById('roostMinutes');
+      let v = roundTo5(parseInt(input.value) || 15);
+      v = Math.min(240, Math.max(5, v));
+      input.value = v;
+      try { localStorage.setItem('nook_roost_min', v); } catch (e) {}
+      showNookToast(`The Roost: ${v} min`, 'media/AC_roost.png', 'enter');
+    }
+
+    async function testWebhook() {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook) return showNookToast('Informe a URL do webhook primeiro!', 'media/AC_settings.png', 'redo');
+      if (!navigator.onLine) return showNookToast('Sem internet!', 'media/AC_settings.png', 'redo');
+      playNookSound('wait');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "ping" }),
+          signal: ctrl.signal
+        });
+        clearTimeout(timer);
+        if (resp.ok) showNookToast('Conexão OK!', 'media/AC_froggychair.png', 'nookTritone');
+        else showNookToast(`O webhook respondeu ${resp.status}`, 'media/AC_settings.png', 'redo');
+      } catch (e) {
+        clearTimeout(timer);
+        showNookToast('O VPS não respondeu', 'media/AC_settings.png', 'redo');
+      }
+    }
+
+    async function confirmClearCache() {
+      const ok = await nookConfirm('O app recarrega e baixa tudo de novo. Seus registros não são apagados.', { title: 'Limpar cache?', okText: 'Limpar', cancelText: 'Voltar' });
+      if (ok) forceClearCache();
+    }
+
+    function initSettings() {
+      setSwitch('soundSwitch', !soundMuted);
+      setSwitch('autoSyncSwitch', autoSync);
+      const slider = document.getElementById('gainSlider');
+      if (slider) slider.value = SOUND_GAIN;
+      const label = document.getElementById('gainLabel');
+      if (label) label.textContent = SOUND_GAIN.toFixed(1) + 'x';
+      const roost = document.getElementById('roostMinutes');
+      if (roost) roost.value = getRoostMinutes();
+      const dd = localStorage.getItem('nook_default_delay');
+      if (dd === '7' || dd === '30') {
+        setSelectValue('diaryDelay', dd);
+        setSelectValue('defaultDelay', dd);
+      }
+    }
+
     function saveWebhookUrl() {
       localStorage.setItem('nook_webhook', document.getElementById('webhookUrl').value.trim());
       showNookToast('Webhook salvo!', 'media/AC_settings.png', 'enter');
@@ -1850,7 +2086,7 @@
       const dot = document.getElementById('netDot');
       if (navigator.onLine) {
         if (dot) dot.setAttribute('fill', '#88d4ab');
-        syncQueueWithVPS(false);
+        if (autoSync) syncQueueWithVPS(false);
       } else {
         if (dot) dot.setAttribute('fill', '#f7b299');
       }
@@ -1877,23 +2113,52 @@
 
     function renderPendingQueue() {
       if (!db) return;
-      const tx = db.transaction("diaryQueue", "readonly");
-      const req = tx.objectStore("diaryQueue").getAll();
-      req.onsuccess = () => {
-        const pending = req.result.filter(i => !i.synced);
+      const tx = db.transaction(["diaryQueue", "timeLogs"], "readonly");
+      const r1 = tx.objectStore("diaryQueue").getAll();
+      const r2 = tx.objectStore("timeLogs").getAll();
+      tx.oncomplete = () => {
+        const posts = r1.result.filter(i => !i.synced);
+        const times = r2.result.filter(i => !i.synced).sort((a, b) => String(a.id).localeCompare(String(b.id)));
         const container = document.getElementById('pendingList');
-        if (pending.length === 0) {
-          container.innerHTML = "Todos os itens já subiram para o VPS.";
+        const hint = document.getElementById('queueHint');
+        if (hint) hint.classList.toggle('hidden', !!localStorage.getItem('nook_webhook'));
+
+        if (!posts.length && !times.length) {
+          container.innerHTML = "Tudo em dia! Nada pendente de envio.";
           return;
         }
-        container.innerHTML = pending.map(p => navRow({
-          onclick: `openLocalEdit('${p.id}')`,
-          bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'camera',
-          thumb: p.thumb_base64,
-          title: (p.media_type === 'video' ? '🎬 ' : '') + (p.caption || 'Sem legenda'),
-          subtitle: `${p.status} • ${fmtBR(p.date_occurred)} → ${fmtBR(p.scheduled_post_date)}`,
-          actionHtml: `<button onclick="event.stopPropagation(); deleteLocalPost('${p.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`
-        })).join('');
+
+        const label = (t) => `<div class="text-[10px] font-bold uppercase text-[#8c7b6b] px-1 pt-1">${t}</div>`;
+        let html = '';
+
+        if (posts.length) {
+          html += label('📸 Postagens') + posts.map(p => navRow({
+            onclick: `openLocalEdit('${p.id}')`,
+            bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'camera',
+            thumb: p.thumb_base64,
+            title: (p.media_type === 'video' ? '🎬 ' : '') + (p.caption || 'Sem legenda'),
+            subtitle: `${p.status} • ${fmtBR(p.date_occurred)} → ${fmtBR(p.scheduled_post_date)}`,
+            actionHtml: `<button onclick="event.stopPropagation(); deleteLocalPost('${p.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`
+          })).join('');
+        }
+
+        if (times.length) {
+          html += label('⏱️ Registros de tempo') + times.map(t => {
+            const st = catStyle(t.category);
+            const state = t.deleted ? 'apagado' : (t.dirty ? 'editado' : 'novo');
+            const trash = t.deleted ? '' : `<button onclick="event.stopPropagation(); deleteTimeEntry('${t.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
+            return navRow({
+              onclick: t.deleted ? '' : `openTimeEdit('${t.id}')`,
+              bg: st.bg, color: st.color, icon: st.icon,
+              title: `${t.category} • ${t.minutes}m`,
+              subtitle: `${state} • ${fmtBR(t.date)}`,
+              actionHtml: trash,
+              chevron: !t.deleted
+            });
+          }).join('');
+        }
+
+        container.innerHTML = html;
       };
     }
 
@@ -1977,6 +2242,7 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => { if (reg && reg.update) reg.update(); }).catch(() => {});
     }
+    initSettings();
     populateCategorySelects();
     initSounds();
     updateNetworkUI();
