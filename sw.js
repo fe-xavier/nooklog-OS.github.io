@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nookphone-v10';
+const CACHE_NAME = 'nookphone-v11';
 const ASSETS = [
   './',
   './index.html',
