@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#f5f0e8">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="media/AC_froggychair.png">
@@ -12,12 +11,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; height: 100%; overscroll-behavior: none; }
     * {
       font-family: 'Quicksand', sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+    html, body { margin: 0; height: 100%; overscroll-behavior: none; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -37,7 +36,7 @@
 </head>
 <body class="bg-[#e4decb] min-h-screen flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
-  <!-- CHASSI DO NOOKPHONE (Exatamente como no exemplo enviado) -->
+  <!-- CHASSI DO NOOKPHONE -->
   <div class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-all duration-500 ease-out translate-y-0 overflow-hidden">
 
     <!-- BARRA DE STATUS SUPERIOR -->
@@ -62,10 +61,17 @@
         <div id="clockDate" class="text-[11px] font-bold text-[#c7beaa] tracking-wide mt-0.5">SATURDAY, NOV. 7</div>
       </div>
 
-      <!-- Status Localização / Som (Direita) -->
+      <!-- Som: alto-falante ligado / mutado (Direita) -->
       <button class="absolute right-7 flex items-center gap-1" onclick="toggleMute()" title="Alternar Som">
-        <svg id="locSvg" width="25" height="15" viewBox="0 0 25 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12.5 1C9.46 1 7 3.46 7 6.5C7 10.62 12.5 14 12.5 14C12.5 14 18 10.62 18 6.5C18 3.46 15.54 1 12.5 1ZM12.5 8.5C11.4 8.5 10.5 7.6 10.5 6.5C10.5 5.4 11.4 4.5 12.5 4.5C13.6 4.5 14.5 5.4 14.5 6.5C14.5 7.6 13.6 8.5 12.5 8.5Z" fill="#c7beaa"/>
+        <svg id="soundSvg" width="25" height="15" viewBox="0 0 25 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="5,5 8,5 12,2 12,13 8,10 5,10" fill="#c7beaa" stroke="#c7beaa" stroke-width="1" stroke-linejoin="round"/>
+          <g id="soundOn" stroke="#c7beaa" stroke-width="1.6" stroke-linecap="round" fill="none">
+            <path d="M15 5.3a3.2 3.2 0 0 1 0 4.4"/>
+            <path d="M17.6 3.2a6.4 6.4 0 0 1 0 8.6"/>
+          </g>
+          <g id="soundOff" style="display:none" stroke="#c7beaa" stroke-width="1.6" stroke-linecap="round" fill="none">
+            <path d="M15.5 5.5l5 4.5M20.5 5.5l-5 4.5"/>
+          </g>
         </svg>
       </button>
     </div>
@@ -86,7 +92,6 @@
         <div class="flex-1 flex flex-col justify-start px-6 py-[18px]">
           <div class="grid grid-cols-3 gap-x-6 gap-y-5 w-full">
 
-            <!-- 1. Timer / Ponto -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-time', 'Timer')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 relative w-full">
                 <img alt="Timer" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_clock.png">
@@ -94,7 +99,6 @@
               </button>
             </div>
 
-            <!-- 2. Escala A3 / Calculadora -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-scale', 'Escala A3')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Escala A3" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_calculator.png">
@@ -102,7 +106,6 @@
               </button>
             </div>
 
-            <!-- 3. Calendário / Métricas -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-stats', 'Métricas')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Calendário" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_calendar.png">
@@ -110,7 +113,6 @@
               </button>
             </div>
 
-            <!-- 4. Câmera / Diário -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-diary', 'Câmera')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Câmera" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_camera.png">
@@ -118,7 +120,6 @@
               </button>
             </div>
 
-            <!-- 5. Acervo VPS -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-archive', 'Acervo VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Acervo" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_gallery.png">
@@ -126,7 +127,6 @@
               </button>
             </div>
 
-            <!-- 6. Fila de Postagens -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-sync', 'Fila & VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <div class="relative">
@@ -137,7 +137,6 @@
               </button>
             </div>
 
-            <!-- 7. The Roost (Pausa/Bem-estar) -->
             <div class="animate-fade-in-up-slow">
               <button onclick="quickWellbeingStamp()" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="The Roost" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_roost.png">
@@ -145,7 +144,6 @@
               </button>
             </div>
 
-            <!-- 8. Recordes & Streaks -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-records', 'Recordes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Recordes" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_health.png">
@@ -153,7 +151,6 @@
               </button>
             </div>
 
-            <!-- 9. Ajustes -->
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-sync', 'Ajustes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
                 <img alt="Ajustes" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_settings.png">
@@ -237,7 +234,7 @@
 
         <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca] mb-3">
           <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Dia do Diagrama</label>
-          <input type="date" id="scaleDate" onchange="renderStats()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-1 mb-3 text-[#3d3d3d]">
+          <input type="date" id="scaleDate" onchange="setSelectedDate(this.value)" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-1 mb-3 text-[#3d3d3d]">
 
           <div class="bg-[#f5f0e8] rounded-2xl p-3 border border-[#e0daca] text-center">
             <div class="text-[10px] font-bold text-[#8c7b6b] uppercase">Medida Total no Papel A3 (297x420mm)</div>
@@ -252,21 +249,56 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- TELA 3: MÉTRICAS DO DIA (1440 MINUTOS)     -->
+      <!-- TELA 3: MÉTRICAS — CALENDÁRIO + HISTÓRICO  -->
       <!-- ========================================== -->
       <section id="screen-stats" class="screen px-5 py-3">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <img src="media/AC_calendar.png" class="w-7 h-7 object-contain" alt="">
-            <h2 class="text-sm font-bold text-[#3d3d3d]">Agenda & % do Dia</h2>
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Calendário</h2>
           </div>
           <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
         </div>
 
-        <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca] mb-3">
-          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Selecionar Data</label>
-          <input type="date" id="statsDate" onchange="syncDateInputs(this.value); renderStats();" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-1 mb-3 text-[#3d3d3d]">
+        <!-- Calendário mensal -->
+        <div class="bg-[#fffdf9] rounded-3xl p-3 shadow-sm border border-[#e0daca] mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none">‹</button>
+            <div class="text-center">
+              <div id="calTitle" class="text-sm font-bold text-[#3d3d3d]">Novembro 2026</div>
+              <div id="calMonthTotal" class="text-[10px] font-bold text-[#8c7b6b]">0m no mês</div>
+            </div>
+            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full bg-[#e8e0d0] text-[#3d3d3d] font-bold text-base leading-none">›</button>
+          </div>
 
+          <div class="grid grid-cols-7 gap-1 mb-1 text-center">
+            <span class="text-[9px] font-bold text-[#8c7b6b]">D</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">S</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">T</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">Q</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">Q</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">S</span>
+            <span class="text-[9px] font-bold text-[#8c7b6b]">S</span>
+          </div>
+          <div id="calGrid" class="grid grid-cols-7 gap-1"></div>
+
+          <div class="flex items-center justify-between mt-2.5">
+            <div class="flex items-center gap-1 text-[9px] font-bold text-[#8c7b6b]">
+              <span>menos</span>
+              <span class="w-3 h-3 rounded border border-[#e0daca]" style="background:#f5f0e8"></span>
+              <span class="w-3 h-3 rounded" style="background:#e3f4ea"></span>
+              <span class="w-3 h-3 rounded" style="background:#c3e8d3"></span>
+              <span class="w-3 h-3 rounded" style="background:#88d4ab"></span>
+              <span class="w-3 h-3 rounded" style="background:#5fbf8f"></span>
+              <span>mais</span>
+            </div>
+            <button onclick="goToday()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2.5 py-0.5 rounded-full">Hoje</button>
+          </div>
+        </div>
+
+        <!-- Resumo do dia selecionado -->
+        <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca] mb-3">
+          <div id="selectedDateLabel" class="text-[10px] font-bold text-[#8c7b6b] uppercase mb-1.5">Dia selecionado</div>
           <div class="flex justify-between text-xs font-bold text-[#3d3d3d] mb-1">
             <span id="dayMinutesText">0 / 1440 min</span>
             <span id="dayPercentText">0.0% do dia</span>
@@ -289,6 +321,15 @@
               <div id="sumYear" class="text-xs font-bold text-[#3d3d3d]">0m</div>
             </div>
           </div>
+        </div>
+
+        <!-- Histórico de atividades do dia -->
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca]">
+          <div class="flex items-center justify-between mb-2">
+            <div id="historyTitle" class="text-xs font-bold text-[#3d3d3d]">Atividades do dia</div>
+            <button onclick="addForSelectedDay()" class="text-[10px] font-bold text-[#2d4739] bg-[#88d4ab] px-2.5 py-0.5 rounded-full">+ Adicionar</button>
+          </div>
+          <div id="historyList" class="space-y-1.5"></div>
         </div>
       </section>
 
@@ -480,7 +521,40 @@
       </div>
     </div>
 
-    <!-- RODAPÉ EM PÍLULA EXATO DO NOOKPHONE -->
+    <!-- MODAL DE EDIÇÃO DE ATIVIDADE (TEMPO) -->
+    <div id="timeEditModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
+        <h3 class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Atividade</h3>
+        <input type="hidden" id="timeEditId">
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">DATA</label>
+          <input type="date" id="timeEditDate" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">CATEGORIA</label>
+          <select id="timeEditCategory" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+            <option value="Acadêmico">📚 Acadêmico</option>
+            <option value="Pesquisa">🔬 Pesquisa</option>
+            <option value="Trabalho">🛠️ Trabalho</option>
+            <option value="Bem-estar">🧘‍♀️ Bem-estar</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">MINUTOS (arredonda para múltiplo de 5)</label>
+          <input type="number" id="timeEditMinutes" min="1" step="5" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="submitTimeEdit()" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl">Salvar</button>
+          <button onclick="closeTimeEdit()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RODAPÉ EM PÍLULA -->
     <div class="flex items-center justify-center py-2.5 px-4 border-t border-[#e0daca]">
       <button onclick="goHome()" ondblclick="forceClearCache()" class="inline-block px-4 py-1 border border-[#e0daca] rounded-full text-xs text-[#c7beaa] active:scale-95 transition-transform">
         <span id="footerPillText" class="font-bold text-[#c7beaa]">Toque para Home • 2x limpa cache</span>
@@ -490,22 +564,25 @@
   </div>
 
   <script>
+    // ==========================================
+    // 0. ALTURA REAL DA TELA + TELA CHEIA
+    // ==========================================
     function setAppHeight() {
-  document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
-}
-window.addEventListener('resize', setAppHeight);
-setAppHeight();
+      document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+    }
+    window.addEventListener('resize', setAppHeight);
+    setAppHeight();
 
-// Tela cheia no navegador (precisa de um toque do usuário; ignorado se já for PWA)
-function goFullscreen() {
-  const el = document.documentElement;
-  const rf = el.requestFullscreen || el.webkitRequestFullscreen;
-  const isPwa = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
-  if (rf && !isPwa && !document.fullscreenElement) {
-    try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
-  }
-}
-document.addEventListener('click', goFullscreen, { once: true });
+    function goFullscreen() {
+      const el = document.documentElement;
+      const rf = el.requestFullscreen || el.webkitRequestFullscreen;
+      const isPwa = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
+      if (rf && !isPwa && !document.fullscreenElement) {
+        try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
+      }
+    }
+    document.addEventListener('click', goFullscreen, { once: true });
+
     // ==========================================
     // 1. SONS DO NOOKPHONE (media/sound/)
     // ==========================================
@@ -557,9 +634,12 @@ document.addEventListener('click', goFullscreen, { once: true });
       showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'nookTritone');
     }
 
+    // Alto-falante com ondas (ligado) ou com X (mutado) — mesma cor dos outros ícones da barra
     function updateSoundUI() {
-      const svgPath = document.querySelector('#locSvg path');
-      if (svgPath) svgPath.setAttribute('fill', soundMuted ? '#e5c5bc' : '#88d4ab');
+      const on = document.getElementById('soundOn');
+      const off = document.getElementById('soundOff');
+      if (on) on.style.display = soundMuted ? 'none' : '';
+      if (off) off.style.display = soundMuted ? '' : 'none';
     }
 
     let toastTimer = null;
@@ -634,13 +714,46 @@ document.addEventListener('click', goFullscreen, { once: true });
       return (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
     }
 
-    function syncDateInputs(val) {
-      document.getElementById('statsDate').value = val;
-      document.getElementById('scaleDate').value = val;
+    function fmtBR(iso) {
+      return iso.split('-').reverse().join('/');
+    }
+
+    // Data selecionada no calendário (compartilhada com a Escala A3)
+    let selectedDate = todayISO();
+    let calYear = new Date(selectedDate + "T12:00:00").getFullYear();
+    let calMonth = new Date(selectedDate + "T12:00:00").getMonth();
+
+    function setSelectedDate(iso) {
+      if (!iso) return;
+      selectedDate = iso;
+      const d = new Date(iso + "T12:00:00");
+      calYear = d.getFullYear();
+      calMonth = d.getMonth();
+      document.getElementById('scaleDate').value = iso;
+      renderStats();
+    }
+
+    function selectDay(iso) {
+      playNookSound('select');
+      selectedDate = iso;
+      document.getElementById('scaleDate').value = iso;
+      renderStats();
+    }
+
+    function changeMonth(delta) {
+      playNookSound('scroll');
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderStats();
+    }
+
+    function goToday() {
+      playNookSound('select');
+      setSelectedDate(todayISO());
     }
 
     document.getElementById('timeDate').value = todayISO();
-    document.getElementById('statsDate').value = todayISO();
     document.getElementById('scaleDate').value = todayISO();
     document.getElementById('diaryDateOccurred').value = todayISO();
     document.getElementById('webhookUrl').value = localStorage.getItem('nook_webhook') || '';
@@ -748,27 +861,48 @@ document.addEventListener('click', goFullscreen, { once: true });
     }
 
     // ==========================================
-    // 6. ESTATÍSTICAS, ESCALA A3 E STREAKS
+    // 6. CALENDÁRIO, ESTATÍSTICAS, ESCALA A3 E STREAKS
     // ==========================================
-    function renderStats() {
-      if (!db) return;
-      const targetDate = document.getElementById('statsDate').value || todayISO();
-      const tx = db.transaction("timeLogs", "readonly");
-      const req = tx.objectStore("timeLogs").getAll();
+    const CAT_ICONS = { 'Acadêmico': '📚', 'Pesquisa': '🔬', 'Trabalho': '🛠️', 'Bem-estar': '🧘‍♀️' };
+    const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-      req.onsuccess = () => {
-        const logs = req.result;
+    // Registros ativos (ignora os apagados que aguardam sincronia)
+    function getActiveLogs(cb) {
+      if (!db) return;
+      const req = db.transaction("timeLogs", "readonly").objectStore("timeLogs").getAll();
+      req.onsuccess = () => cb(req.result.filter(l => !l.deleted));
+    }
+
+    function fmtMin(min) {
+      if (min < 60) return `${min}m`;
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+    }
+
+    function heatColor(min) {
+      if (min <= 0) return '#f5f0e8';
+      if (min < 60) return '#e3f4ea';
+      if (min < 180) return '#c3e8d3';
+      if (min < 360) return '#88d4ab';
+      return '#5fbf8f';
+    }
+
+    function renderStats() {
+      getActiveLogs((logs) => {
+        const targetDate = selectedDate;
         const dayLogs = logs.filter(l => l.date === targetDate);
         const dayTotal = dayLogs.reduce((acc, cur) => acc + cur.minutes, 0);
         const dayPercent = ((dayTotal / 1440) * 100).toFixed(1);
 
+        document.getElementById('selectedDateLabel').textContent = `Dia selecionado: ${fmtBR(targetDate)}`;
         document.getElementById('dayMinutesText').textContent = `${dayTotal} / 1440 min`;
         document.getElementById('dayPercentText').textContent = `${dayPercent}% do dia`;
         document.getElementById('dayProgressFill').style.width = `${Math.min(dayPercent, 100)}%`;
         document.getElementById('scaleTotalText').textContent = 
           `${(dayTotal / 10).toFixed(1)} mm (${(dayTotal / 100).toFixed(2)} cm)`;
 
-        // Atualiza barra inferior na Home com resumo do dia atual
+        // Barra inferior na Home com resumo do dia atual
         const todaySum = logs.filter(l => l.date === todayISO()).reduce((a, c) => a + c.minutes, 0);
         if (document.getElementById('screen-home').classList.contains('active')) {
           document.getElementById('footerPillText').textContent = 
@@ -823,6 +957,150 @@ document.addEventListener('click', goFullscreen, { once: true });
         document.getElementById('autoTags').innerHTML = tags
           .map(t => `<span class="bg-[#f5f0e8] border border-[#e0daca] px-2.5 py-1 rounded-full text-[11px] font-bold text-[#3d3d3d]">${t}</span>`)
           .join('');
+
+        renderCalendar(mapByDate);
+        renderHistory(dayLogs);
+      });
+    }
+
+    function renderCalendar(mapByDate) {
+      const first = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const today = todayISO();
+      const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+      let monthTotal = 0;
+      let html = '';
+
+      for (let i = 0; i < first; i++) html += '<div></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${monthPrefix}-${String(d).padStart(2, '0')}`;
+        const min = mapByDate[iso] || 0;
+        monthTotal += min;
+        const isSel = iso === selectedDate;
+        const isToday = iso === today;
+        const border = isSel ? 'border-2 border-[#3d3d3d]' : 'border border-[#e0daca]';
+        const ring = (isToday && !isSel) ? 'ring-2 ring-[#f7b299]' : '';
+        html += `
+          <button onclick="selectDay('${iso}')" class="h-11 rounded-xl flex flex-col items-center justify-center leading-none ${border} ${ring}" style="background:${heatColor(min)}">
+            <span class="text-[11px] font-bold text-[#3d3d3d]">${d}</span>
+            <span class="text-[8px] font-bold text-[#5a4b3c] mt-0.5">${min ? fmtMin(min) : '&nbsp;'}</span>
+          </button>`;
+      }
+
+      document.getElementById('calGrid').innerHTML = html;
+      document.getElementById('calTitle').textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
+      document.getElementById('calMonthTotal').textContent = `${fmtMin(monthTotal)} no mês`;
+    }
+
+    // ==========================================
+    // 6b. HISTÓRICO DE ATIVIDADES (EDITAR / APAGAR)
+    // ==========================================
+    function renderHistory(dayLogs) {
+      document.getElementById('historyTitle').textContent = `Atividades de ${fmtBR(selectedDate)}`;
+      const list = document.getElementById('historyList');
+
+      if (dayLogs.length === 0) {
+        list.innerHTML = '<div class="text-[11px] text-[#8c7b6b] font-semibold">Nenhuma atividade neste dia.</div>';
+        return;
+      }
+
+      const sorted = [...dayLogs].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+      list.innerHTML = sorted.map(l => {
+        const ts = parseInt(String(l.id).split('_')[1]);
+        const hour = ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+        return `
+          <div class="flex items-center gap-2 bg-[#f5f0e8] border border-[#e0daca] rounded-2xl px-2.5 py-1.5">
+            <span class="text-base">${CAT_ICONS[l.category] || '⏱️'}</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-[11px] font-bold text-[#3d3d3d] truncate">${l.category}</div>
+              <div class="text-[10px] font-semibold text-[#8c7b6b]">${l.minutes}m • ${(l.minutes/10).toFixed(1)}mm${hour ? ' • lançado às ' + hour : ''}</div>
+            </div>
+            <button onclick="openTimeEdit('${l.id}')" class="bg-[#fde293] text-[#5a4b3c] text-[11px] font-bold w-7 h-7 rounded-full" title="Editar">✏️</button>
+            <button onclick="deleteTimeEntry('${l.id}')" class="bg-[#ee7b6d] text-white text-[11px] font-bold w-7 h-7 rounded-full" title="Apagar">🗑️</button>
+          </div>`;
+      }).join('');
+    }
+
+    // Abre a tela de Timer já com o dia selecionado no calendário
+    function addForSelectedDay() {
+      document.getElementById('timeDate').value = selectedDate;
+      openApp('screen-time', 'Timer');
+    }
+
+    function openTimeEdit(id) {
+      const req = db.transaction("timeLogs", "readonly").objectStore("timeLogs").get(id);
+      req.onsuccess = () => {
+        const it = req.result;
+        if (!it) return;
+        playNookSound('menuOpen');
+        document.getElementById('timeEditId').value = it.id;
+        document.getElementById('timeEditDate').value = it.date;
+        document.getElementById('timeEditCategory').value = it.category;
+        document.getElementById('timeEditMinutes').value = it.minutes;
+        document.getElementById('timeEditModal').classList.remove('hidden');
+      };
+    }
+
+    function closeTimeEdit() {
+      playNookSound('menuClose');
+      document.getElementById('timeEditModal').classList.add('hidden');
+    }
+
+    function submitTimeEdit() {
+      const id = document.getElementById('timeEditId').value;
+      const date = document.getElementById('timeEditDate').value;
+      const category = document.getElementById('timeEditCategory').value;
+      const raw = parseInt(document.getElementById('timeEditMinutes').value) || 0;
+
+      if (!date || raw <= 0) return showNookToast('Dados inválidos!', 'media/AC_clock.png', 'redo');
+      const minutes = roundTo5(raw);
+
+      const tx = db.transaction("timeLogs", "readwrite");
+      const store = tx.objectStore("timeLogs");
+      const g = store.get(id);
+      g.onsuccess = () => {
+        const it = g.result;
+        if (!it) return;
+        // Se já tinha subido pro VPS, marca para reenviar como atualização
+        if (it.synced || it.dirty) it.dirty = true;
+        it.date = date;
+        it.category = category;
+        it.minutes = minutes;
+        it.mm_scale = Number((minutes / 10).toFixed(2));
+        it.synced = false;
+        store.put(it);
+      };
+      tx.oncomplete = () => {
+        document.getElementById('timeEditModal').classList.add('hidden');
+        showNookToast('Atividade atualizada!', 'media/AC_clock.png', 'stamp');
+        updateQueueCounter();
+        setSelectedDate(date);
+      };
+    }
+
+    function deleteTimeEntry(id) {
+      if (!confirm("Apagar esta atividade?")) return;
+      const tx = db.transaction("timeLogs", "readwrite");
+      const store = tx.objectStore("timeLogs");
+      const g = store.get(id);
+      g.onsuccess = () => {
+        const it = g.result;
+        if (!it) return;
+        if (!it.synced && !it.dirty) {
+          // Nunca chegou ao VPS: some de vez
+          store.delete(id);
+        } else {
+          // Já está no VPS: guarda como "apagado" até avisar o servidor
+          it.deleted = true;
+          it.synced = false;
+          store.put(it);
+        }
+      };
+      tx.oncomplete = () => {
+        showNookToast('Atividade apagada!', 'media/AC_post.png', 'postDelete');
+        updateQueueCounter();
+        renderStats();
       };
     }
 
@@ -1173,15 +1451,23 @@ document.addEventListener('click', goFullscreen, { once: true });
 
       for (const item of timeItems) {
         try {
+          // create_time (novo) • update_time (editado) • delete_time (apagado)
+          const action = item.deleted ? 'delete_time' : (item.dirty ? 'update_time' : 'create_time');
           const resp = await fetch(webhook, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
+            body: JSON.stringify({ ...item, action })
           });
           if (resp.ok) {
             sent++;
-            item.synced = true;
-            db.transaction("timeLogs", "readwrite").objectStore("timeLogs").put(item);
+            const store = db.transaction("timeLogs", "readwrite").objectStore("timeLogs");
+            if (item.deleted) {
+              store.delete(item.id);
+            } else {
+              item.synced = true;
+              item.dirty = false;
+              store.put(item);
+            }
           }
         } catch (e) {}
       }
@@ -1197,7 +1483,7 @@ document.addEventListener('click', goFullscreen, { once: true });
       const r1 = tx.objectStore("timeLogs").getAll();
       const r2 = tx.objectStore("diaryQueue").getAll();
       tx.oncomplete = () => {
-        const blob = new Blob([JSON.stringify({ timeLogs: r1.result, diaryQueue: r2.result }, null, 2)], { type: "application/json" });
+        const blob = new Blob([JSON.stringify({ timeLogs: r1.result.filter(i => !i.deleted), diaryQueue: r2.result }, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `nookphone-backup-${todayISO()}.json`;
