@@ -17,7 +17,7 @@
       user-select: none;
     }
     /* fundo do <html> na mesma cor do corpo: evita o "pisca branco" quando o teclado abre */
-    html { background: #e4decb; }
+    html { background: #f5f0e8; }
     html, body { margin: 0; height: 100%; overscroll-behavior: none; touch-action: manipulation; }
     /* o corpo acompanha a área realmente visível (some o espaço fantasma e sobe junto com o teclado) */
     body { position: fixed; left: 0; right: 0; top: var(--app-top, 0px); height: var(--app-h, 100dvh); }
@@ -60,10 +60,10 @@
     }
   </style>
 </head>
-<body class="bg-[#e4decb] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
+<body class="bg-[#f5f0e8] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
   <!-- CHASSI DO NOOKPHONE -->
-  <div class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-none overflow-hidden">
+  <div id="phoneShell" class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] flex flex-col transition-none overflow-hidden">
 
     <!-- BARRA DE STATUS SUPERIOR -->
     <div class="relative flex items-center justify-center pt-5 px-4 pb-2 border-b border-[#e0daca]">
@@ -721,11 +721,37 @@
     }
     setAppHeight();
 
-    // Campo de texto sempre visível quando o teclado abre
+    // Campo de texto sempre visível quando o teclado abre.
+    // Rola só o contêiner rolável mais próximo (o scrollIntoView também mexia no chassi/página e piscava).
+    function lockShellScroll() {
+      const shell = document.getElementById('phoneShell');
+      if (shell) { shell.scrollTop = 0; shell.scrollLeft = 0; }
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+
+    function scrollFieldIntoView(el) {
+      let p = el.parentElement;
+      while (p && p !== document.body) {
+        const oy = getComputedStyle(p).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && p.scrollHeight > p.clientHeight) break;
+        p = p.parentElement;
+      }
+      if (p && p !== document.body) {
+        const pr = p.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        const delta = (er.top + er.height / 2) - (pr.top + pr.height / 2);
+        try { p.scrollTo({ top: p.scrollTop + delta, behavior: 'smooth' }); } catch (err) { p.scrollTop += delta; }
+      }
+      lockShellScroll();
+    }
+
+    document.getElementById('phoneShell').addEventListener('scroll', lockShellScroll);
+
     document.addEventListener('focusin', (e) => {
       const el = e.target;
       if (el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && el.type !== 'file') {
-        setTimeout(() => { try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {} }, 350);
+        setTimeout(() => scrollFieldIntoView(el), 350);
       }
     });
 
@@ -896,6 +922,23 @@
       } catch (e) {}
     }
 
+    // Diagnóstico: abra o app com ?debugsound no final do endereço para ver, na tela, cada som tocado
+    const DEBUG_SOUND = /debugsound/.test(location.search);
+    function logSound(name, how) {
+      if (!DEBUG_SOUND) return;
+      let box = document.getElementById('soundDebug');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'soundDebug';
+        box.style.cssText = 'position:fixed;top:4px;left:4px;z-index:99;background:rgba(0,0,0,.78);color:#fff;font:10px monospace;padding:4px 6px;border-radius:6px;max-width:94%;pointer-events:none;white-space:pre';
+        document.body.appendChild(box);
+      }
+      const buf = bufferCache[name];
+      const line = `${Math.round(performance.now()) % 100000}ms ${name} ${how}${buf ? ' ' + buf.duration.toFixed(2) + 's' : ''} ${(SOUND_PATHS[name] || '').split('/').pop()}`;
+      box.textContent = (box.textContent ? box.textContent + '\n' : '') + line;
+      box.textContent = box.textContent.split('\n').slice(-8).join('\n');
+    }
+
     function playNookSound(name) {
       if (soundMuted) return;
 
@@ -909,6 +952,7 @@
         // o clique que vem depois de um toque que já tocou este som não repete
         if (pointerPlayed && pointerPlayed.name === name && now - pointerPlayed.t < 1500) {
           pointerPlayed = null;
+          logSound(name, 'ignorado(clique)');
           return;
         }
         // trava extra contra sons repetidos em sequência rápida
@@ -927,12 +971,14 @@
           src.onended = () => { if (activeSources[name] === src) delete activeSources[name]; };
           activeSources[name] = src;
           src.start(0);
+          logSound(name, 'webaudio');
           if (SOUND_MAX_MS[name]) {
             setTimeout(() => { try { src.stop(); } catch (e) {} }, SOUND_MAX_MS[name]);
           }
           return;
         } catch (e) {}
       }
+      logSound(name, 'fallback');
       playFallback(name);
     }
 
@@ -1489,7 +1535,6 @@
       saveTags(tags);
 
       nameEl.value = '';
-      nameEl.blur();
       populateCategorySelects(name);
       renderTagManager();
       renderTagIconGrid();
