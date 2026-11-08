@@ -16,9 +16,11 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+    /* fundo do <html> na mesma cor do corpo: evita o "pisca branco" quando o teclado abre */
+    html { background: #e4decb; }
     html, body { margin: 0; height: 100%; overscroll-behavior: none; touch-action: manipulation; }
     /* o corpo acompanha a área realmente visível (some o espaço fantasma e sobe junto com o teclado) */
-    body { position: fixed; left: 0; right: 0; top: var(--app-top, 0px); height: var(--app-h, 100%); }
+    body { position: fixed; left: 0; right: 0; top: var(--app-top, 0px); height: var(--app-h, 100dvh); }
     .kb-open #footerBar { display: none; }
     .ic { display: inline-flex; width: 1.15em; height: 1.15em; flex-shrink: 0; vertical-align: -0.2em; }
     .ic svg { display: block; width: 100%; height: 100%; }
@@ -38,12 +40,30 @@
 
     input, select, textarea { user-select: text; }
     #screen-home { margin-top: auto; margin-bottom: auto; }
+
+    /* Estilo "lista do NookPhone": sem linhas de borda nos cartões, campos e blocos */
+    .screen [class*="border-[#e0daca]"],
+    #editModal [class*="border-[#e0daca]"],
+    #timeEditModal [class*="border-[#e0daca]"],
+    #tagModal [class*="border-[#e0daca]"],
+    #confirmModal [class*="border-[#e0daca]"] {
+      border-color: transparent !important;
+    }
+    .screen [class*="bg-[#fffdf9]"] {
+      background-color: rgba(255,255,255,.6) !important;
+      box-shadow: 0 1px 3px rgba(90,75,60,.10);
+    }
+    #editModal [class*="bg-[#fffdf9]"],
+    #timeEditModal [class*="bg-[#fffdf9]"],
+    #tagModal [class*="bg-[#fffdf9]"] {
+      background-color: rgba(255,255,255,.7) !important;
+    }
   </style>
 </head>
 <body class="bg-[#e4decb] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
   <!-- CHASSI DO NOOKPHONE -->
-  <div class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-all duration-500 ease-out translate-y-0 overflow-hidden">
+  <div class="relative bg-[#f5f0e8] w-full h-[var(--app-h)] sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-none overflow-hidden">
 
     <!-- BARRA DE STATUS SUPERIOR -->
     <div class="relative flex items-center justify-center pt-5 px-4 pb-2 border-b border-[#e0daca]">
@@ -709,30 +729,26 @@
       }
     });
 
-    // ---- Tela cheia (e volta sozinha depois do seletor de arquivos) ----
-    function isPwaMode() {
-      return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
+    // ---- Tela cheia: volta sozinha no primeiro toque depois do seletor de arquivos ----
+    function isFullscreenNow() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement);
     }
 
     function goFullscreen() {
+      if (isFullscreenNow()) return;
       const el = document.documentElement;
       const rf = el.requestFullscreen || el.webkitRequestFullscreen;
-      if (rf && !isPwaMode() && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
-      }
+      if (!rf) return;
+      try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
     }
 
-    let fsArmed = false;
-    function armFullscreen() {
-      if (fsArmed || isPwaMode()) return;
-      fsArmed = true;
-      document.addEventListener('click', () => { fsArmed = false; goFullscreen(); }, { once: true });
-    }
-    armFullscreen();
-    ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) armFullscreen(); // saiu: volta no próximo toque
-      scheduleHeightFix();
-    }));
+    // Listener permanente (o navegador só aceita dentro de um gesto do usuário)
+    ['pointerup', 'touchend', 'click'].forEach(ev =>
+      document.addEventListener(ev, goFullscreen, { passive: true })
+    );
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev =>
+      document.addEventListener(ev, scheduleHeightFix)
+    );
 
     // ==========================================
     // 1. SONS DO NOOKPHONE (media/sound/)
@@ -771,6 +787,7 @@
     const fallbackAudio = {};
     const lastPlayed = {};
     let lastScrollSound = 0;
+    let pointerPlayed = null; // som já tocado pelo toque atual (evita tocar de novo no clique)
 
     // Ordem de carregamento: os sons de navegação primeiro
     const DECODE_ORDER = ['menuOpen', 'menuClose', 'select', 'phoneOpen', 'scroll', 'stamp', 'pointGet', 'postDelete', 'redo', 'flag', 'enter', 'balloon', 'postMove', 'wait', 'appStart', 'nookSend', 'nookTritone'];
@@ -814,7 +831,12 @@
       // Som no instante do toque (não espera soltar o dedo): botões marcados com data-snd
       document.addEventListener('pointerdown', (e) => {
         const el = e.target && e.target.closest ? e.target.closest('[data-snd]') : null;
-        if (el && !el.disabled) playNookSound(el.getAttribute('data-snd'));
+        if (el && !el.disabled) {
+          const name = el.getAttribute('data-snd');
+          pointerPlayed = null;
+          playNookSound(name);
+          pointerPlayed = { name, t: performance.now() };
+        }
       }, { capture: true, passive: true });
 
       applySoundHooks();
@@ -883,10 +905,15 @@
         if (t - lastScrollSound < 120) return;
         lastScrollSound = t;
       } else {
-        // o toque (pointerdown) e o clique do mesmo botão não tocam duas vezes
-        const t = performance.now();
-        if (t - (lastPlayed[name] || -1e9) < 280) return;
-        lastPlayed[name] = t;
+        const now = performance.now();
+        // o clique que vem depois de um toque que já tocou este som não repete
+        if (pointerPlayed && pointerPlayed.name === name && now - pointerPlayed.t < 1500) {
+          pointerPlayed = null;
+          return;
+        }
+        // trava extra contra sons repetidos em sequência rápida
+        if (now - (lastPlayed[name] || -1e9) < 280) return;
+        lastPlayed[name] = now;
       }
 
       if (audioCtx && bufferCache[name]) {
@@ -1050,7 +1077,7 @@
       if (screenId === 'screen-stats' || screenId === 'screen-scale' || screenId === 'screen-records') renderStats();
       if (screenId === 'screen-queue') renderPendingQueue();
       if (screenId === 'screen-settings') initSettings();
-      if (screenId === 'screen-archive') fetchVPSArchive();
+      if (screenId === 'screen-archive') fetchVPSArchive(true); // abrir o app não toca o som de "aguarde"
     }
 
     function goHome() {
@@ -1069,9 +1096,28 @@
     // ==========================================
     // 5. MÓDULO DE TEMPO (MÚLTIPLOS DE 5)
     // ==========================================
+    const DAY_LIMIT = 1440; // 24h: o total de um dia nunca passa disso
+
     function roundTo5(minutes) {
       const r = Math.round(minutes / 5) * 5;
       return r === 0 && minutes > 0 ? 5 : r;
+    }
+
+    // Quanto ainda cabe no dia (ignora um registro, útil ao editar)
+    function getDayRemaining(date, excludeId) {
+      return new Promise(res => {
+        getActiveLogs(logs => {
+          const used = logs
+            .filter(l => l.date === date && l.id !== excludeId)
+            .reduce((a, l) => a + l.minutes, 0);
+          res(DAY_LIMIT - used);
+        });
+      });
+    }
+
+    function limitMessage(remaining) {
+      const fit = Math.floor(Math.max(0, remaining) / 5) * 5;
+      return fit < 5 ? 'Esse dia já tem 24h (1440 min)!' : `Só cabem mais ${fit} min neste dia!`;
     }
 
     function previewRounding() {
@@ -1083,12 +1129,13 @@
         `Arredondado (múltiplo de 5): <strong class="text-[#3d3d3d]">${rounded} min</strong> (${(rounded/10).toFixed(1)} mm)`;
     }
 
-    function saveManualTime() {
+    async function saveManualTime() {
       const h = parseInt(document.getElementById('manualHours').value) || 0;
       const m = parseInt(document.getElementById('manualMinutes').value) || 0;
       const totalRaw = (h * 60) + m;
       if (totalRaw <= 0) return showNookToast('Insira um tempo válido!', 'media/AC_clock.png', 'redo');
-      storeTimeEntry(roundTo5(totalRaw));
+      const ok = await storeTimeEntry(roundTo5(totalRaw));
+      if (!ok) return; // mantém os números digitados
       document.getElementById('manualHours').value = '';
       document.getElementById('manualMinutes').value = '';
       previewRounding();
@@ -1123,27 +1170,52 @@
         const elapsedMin = (Date.now() - timerStart) / 60000;
         setTimerButton(false);
         document.getElementById('timerDisplay').textContent = "00:00:00";
-        storeTimeEntry(roundTo5(elapsedMin));
+        // clamp = true: se não couber tudo no dia, guarda só o que cabe
+        storeTimeEntry(roundTo5(elapsedMin), undefined, true);
       }
     }
 
-    function storeTimeEntry(minutes, categoryOverride) {
+    // Devolve true se gravou, false se recusou (limite de 24h por dia)
+    async function storeTimeEntry(minutes, categoryOverride, clamp = false) {
+      const date = document.getElementById('timeDate').value;
+      if (!date) {
+        showNookToast('Escolha uma data!', 'media/AC_clock.png', 'redo');
+        return false;
+      }
+
+      const remaining = await getDayRemaining(date);
+      let adjusted = false;
+      if (minutes > remaining) {
+        const fit = Math.floor(Math.max(0, remaining) / 5) * 5;
+        if (!clamp || fit < 5) {
+          showNookToast(limitMessage(remaining), 'media/AC_clock.png', 'redo');
+          return false;
+        }
+        minutes = fit; // timer: guarda só o que cabe
+        adjusted = true;
+      }
+
       const entry = {
         action: "create_time",
         id: "time_" + Date.now(),
-        date: document.getElementById('timeDate').value,
+        date: date,
         category: categoryOverride || document.getElementById('timeCategory').value,
         minutes: minutes,
         mm_scale: Number((minutes / 10).toFixed(2)),
         synced: false
       };
-      const tx = db.transaction("timeLogs", "readwrite");
-      tx.objectStore("timeLogs").put(entry);
-      tx.oncomplete = () => {
-        showNookToast(`+${minutes}m (${entry.mm_scale}mm) em ${entry.category}!`, 'media/AC_clock.png', 'pointGet');
-        updateQueueCounter();
-        renderStats();
-      };
+
+      await new Promise(resolve => {
+        const tx = db.transaction("timeLogs", "readwrite");
+        tx.objectStore("timeLogs").put(entry);
+        tx.oncomplete = resolve;
+        tx.onerror = resolve;
+      });
+
+      showNookToast(`+${minutes}m (${entry.mm_scale}mm) em ${entry.category}${adjusted ? ' (ajustado)' : ''}!`, 'media/AC_clock.png', 'pointGet');
+      updateQueueCounter();
+      renderStats();
+      return true;
     }
 
     // ==========================================
@@ -1677,7 +1749,7 @@
       document.getElementById('timeEditModal').classList.add('hidden');
     }
 
-    function submitTimeEdit() {
+    async function submitTimeEdit() {
       const id = document.getElementById('timeEditId').value;
       const date = document.getElementById('timeEditDate').value;
       const category = document.getElementById('timeEditCategory').value;
@@ -1685,6 +1757,10 @@
 
       if (!date || raw <= 0) return showNookToast('Dados inválidos!', 'media/AC_clock.png', 'redo');
       const minutes = roundTo5(raw);
+
+      // Limite de 24h por dia (ignora o próprio registro que está sendo editado)
+      const remaining = await getDayRemaining(date, id);
+      if (minutes > remaining) return showNookToast(limitMessage(remaining), 'media/AC_clock.png', 'redo');
 
       const tx = db.transaction("timeLogs", "readwrite");
       const store = tx.objectStore("timeLogs");
@@ -1769,6 +1845,7 @@
     // Recebe o arquivo tanto do botão "Tirar agora" quanto do "Enviar"
     function handleMedia(event) {
       scheduleHeightFix(); // o seletor de arquivos tira o app da tela cheia
+      goFullscreen();      // tenta voltar já; se o navegador negar (sem toque), o próximo toque volta
       const input = event.target;
       const file = input.files && input.files[0];
       if (!file) return;
@@ -1931,7 +2008,8 @@
       renderArchiveList();
     }
 
-    async function fetchVPSArchive() {
+    // silent = true: não toca o som de "aguarde" (usado ao abrir o app, que já toca o som de abrir)
+    async function fetchVPSArchive(silent = false) {
       const webhook = localStorage.getItem('nook_webhook');
       const notice = document.getElementById('archiveOfflineNotice');
       const container = document.getElementById('archiveContainer');
@@ -1947,7 +2025,7 @@
         return;
       }
 
-      playNookSound('wait');
+      if (silent !== true) playNookSound('wait');
       container.innerHTML = `<p class="flex items-center gap-1.5">${svgIcon('refresh', 'w-3.5 h-3.5 animate-spin', 'currentColor')}Buscando acervo no VPS...</p>`;
 
       try {
