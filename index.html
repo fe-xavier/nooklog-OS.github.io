@@ -324,12 +324,12 @@
         </div>
 
         <!-- Histórico de atividades do dia -->
-        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca]">
-          <div class="flex items-center justify-between mb-2">
+        <div>
+          <div class="flex items-center justify-between mb-2 px-1">
             <div id="historyTitle" class="text-xs font-bold text-[#3d3d3d]">Atividades do dia</div>
             <button onclick="addForSelectedDay()" class="text-[10px] font-bold text-[#2d4739] bg-[#88d4ab] px-2.5 py-0.5 rounded-full">+ Adicionar</button>
           </div>
-          <div id="historyList" class="space-y-1.5"></div>
+          <div id="historyList" class="space-y-2"></div>
         </div>
       </section>
 
@@ -446,7 +446,7 @@
           ⚠️ Modo Offline: conecte o Wi-Fi para ver, editar ou cancelar itens do VPS.
         </div>
 
-        <div id="archiveContainer" class="bg-[#fffdf9] rounded-3xl p-3 shadow-sm border border-[#e0daca] space-y-2.5 text-xs text-[#8c7b6b]">
+        <div id="archiveContainer" class="space-y-2 text-xs text-[#8c7b6b]">
           Toque em ↻ para buscar os registros do servidor.
         </div>
       </section>
@@ -477,9 +477,9 @@
           </div>
         </div>
 
-        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca]">
-          <div class="text-xs font-bold text-[#3d3d3d] mb-1.5">Fila Local no Aparelho</div>
-          <div id="pendingList" class="text-[11px] text-[#8c7b6b] space-y-1.5">Nenhum item pendente.</div>
+        <div>
+          <div class="text-xs font-bold text-[#3d3d3d] mb-2 px-1">Fila Local no Aparelho</div>
+          <div id="pendingList" class="text-[11px] text-[#8c7b6b] space-y-2">Nenhum item pendente.</div>
         </div>
       </section>
 
@@ -550,6 +550,19 @@
         <div class="grid grid-cols-2 gap-2 pt-1">
           <button onclick="submitTimeEdit()" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl">Salvar</button>
           <button onclick="closeTimeEdit()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP DE CONFIRMAÇÃO (substitui o confirm() do navegador) -->
+    <div id="confirmModal" class="hidden absolute inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-5 w-full max-w-[290px] shadow-xl text-center">
+        <img src="media/AC_froggychair.png" class="w-12 h-12 object-contain mx-auto mb-1 drop-shadow-md" alt="">
+        <h3 id="confirmTitle" class="text-sm font-bold text-[#3d3d3d]">Confirmar</h3>
+        <p id="confirmMessage" class="text-xs font-semibold text-[#8c7b6b] mt-1 mb-3"></p>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="confirmCancel" onclick="resolveConfirm(false)" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform">Voltar</button>
+          <button id="confirmOk" onclick="resolveConfirm(true)" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform">Confirmar</button>
         </div>
       </div>
     </div>
@@ -863,7 +876,75 @@
     // ==========================================
     // 6. CALENDÁRIO, ESTATÍSTICAS, ESCALA A3 E STREAKS
     // ==========================================
-    const CAT_ICONS = { 'Acadêmico': '📚', 'Pesquisa': '🔬', 'Trabalho': '🛠️', 'Bem-estar': '🧘‍♀️' };
+    // ---- Estilo de lista do NookPhone: ícone colorido + título + subtítulo + seta ----
+    const ICONS = {
+      book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+      flask: '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+      briefcase: '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+      leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+      camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+      trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+      x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+      chevron: '<path d="m9 18 6-6-6-6"/>'
+    };
+
+    const CAT_STYLE = {
+      'Acadêmico': { bg: 'rgb(156,180,216)', color: 'rgb(44,74,107)', icon: 'book' },
+      'Pesquisa':  { bg: 'rgb(126,200,227)', color: 'rgb(26,95,122)', icon: 'flask' },
+      'Trabalho':  { bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'briefcase' },
+      'Bem-estar': { bg: 'rgb(168,213,186)', color: 'rgb(45,95,63)', icon: 'leaf' }
+    };
+
+    function esc(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function svgIcon(name, cls, color) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}" style="color:${color}">${ICONS[name]}</svg>`;
+    }
+
+    function navRow({ onclick = '', bg, color, icon, thumb = '', title, subtitle = '', actionHtml = '', chevron = true }) {
+      const lead = thumb
+        ? `<img src="${esc(thumb)}" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt="">`
+        : `<div class="rounded-lg p-1.5 flex-shrink-0" style="background-color:${bg}">${svgIcon(icon, 'w-6 h-6', color)}</div>`;
+      return `
+        <div ${onclick ? `onclick="${onclick}"` : ''} class="animate-fade-in-up-slow w-full bg-white/60 ${onclick ? 'active:bg-white/90 cursor-pointer' : ''} rounded-xl p-2 flex items-center gap-2.5 shadow-sm text-left">
+          ${lead}
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-bold text-[#3d3d3d] truncate">${esc(title)}</div>
+            <div class="text-[10px] font-bold text-[#8b8b8b] truncate">${esc(subtitle)}</div>
+          </div>
+          ${actionHtml}
+          ${chevron ? svgIcon('chevron', 'w-4 h-4 flex-shrink-0', '#8b8b8b') : ''}
+        </div>`;
+    }
+
+    // ---- Popup de confirmação próprio (no lugar do confirm() do navegador) ----
+    let confirmResolver = null;
+    function nookConfirm(message, opts = {}) {
+      return new Promise(resolve => {
+        confirmResolver = resolve;
+        document.getElementById('confirmTitle').textContent = opts.title || 'Confirmar';
+        document.getElementById('confirmMessage').textContent = message;
+        const ok = document.getElementById('confirmOk');
+        ok.textContent = opts.okText || 'Confirmar';
+        ok.className = 'font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform ' +
+          (opts.danger ? 'bg-[#ee7b6d] text-white' : 'bg-[#88d4ab] text-[#244232]');
+        document.getElementById('confirmCancel').textContent = opts.cancelText || 'Voltar';
+        playNookSound('menuOpen');
+        document.getElementById('confirmModal').classList.remove('hidden');
+      });
+    }
+
+    function resolveConfirm(value) {
+      document.getElementById('confirmModal').classList.add('hidden');
+      playNookSound(value ? 'select' : 'menuClose');
+      if (confirmResolver) {
+        const r = confirmResolver;
+        confirmResolver = null;
+        r(value);
+      }
+    }
     const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
     // Registros ativos (ignora os apagados que aguardam sincronia)
@@ -1007,18 +1088,17 @@
 
       const sorted = [...dayLogs].sort((a, b) => String(a.id).localeCompare(String(b.id)));
       list.innerHTML = sorted.map(l => {
+        const st = CAT_STYLE[l.category] || { bg: 'rgb(224,218,202)', color: 'rgb(140,123,107)', icon: 'book' };
         const ts = parseInt(String(l.id).split('_')[1]);
         const hour = ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-        return `
-          <div class="flex items-center gap-2 bg-[#f5f0e8] border border-[#e0daca] rounded-2xl px-2.5 py-1.5">
-            <span class="text-base">${CAT_ICONS[l.category] || '⏱️'}</span>
-            <div class="flex-1 min-w-0">
-              <div class="text-[11px] font-bold text-[#3d3d3d] truncate">${l.category}</div>
-              <div class="text-[10px] font-semibold text-[#8c7b6b]">${l.minutes}m • ${(l.minutes/10).toFixed(1)}mm${hour ? ' • lançado às ' + hour : ''}</div>
-            </div>
-            <button onclick="openTimeEdit('${l.id}')" class="bg-[#fde293] text-[#5a4b3c] text-[11px] font-bold w-7 h-7 rounded-full" title="Editar">✏️</button>
-            <button onclick="deleteTimeEntry('${l.id}')" class="bg-[#ee7b6d] text-white text-[11px] font-bold w-7 h-7 rounded-full" title="Apagar">🗑️</button>
-          </div>`;
+        const trash = `<button onclick="event.stopPropagation(); deleteTimeEntry('${l.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
+        return navRow({
+          onclick: `openTimeEdit('${l.id}')`,
+          bg: st.bg, color: st.color, icon: st.icon,
+          title: l.category,
+          subtitle: `${l.minutes}m • ${(l.minutes / 10).toFixed(1)}mm${hour ? ' • ' + hour : ''}`,
+          actionHtml: trash
+        });
       }).join('');
     }
 
@@ -1079,8 +1159,9 @@
       };
     }
 
-    function deleteTimeEntry(id) {
-      if (!confirm("Apagar esta atividade?")) return;
+    async function deleteTimeEntry(id) {
+      const ok = await nookConfirm('Essa atividade será removida do seu histórico.', { title: 'Apagar atividade?', okText: 'Apagar', cancelText: 'Manter', danger: true });
+      if (!ok) return;
       const tx = db.transaction("timeLogs", "readwrite");
       const store = tx.objectStore("timeLogs");
       const g = store.get(id);
@@ -1252,41 +1333,33 @@
         return;
       }
 
-      const badgeColors = {
-        agendado: 'bg-[#fde293] text-[#5a4b3c]',
-        rascunho: 'bg-[#cdb4db] text-[#3f2e4c]',
-        postado: 'bg-[#88d4ab] text-[#244232]',
-        cancelado: 'bg-[#e0daca] text-[#8c7b6b] line-through'
+      const statusStyle = {
+        agendado:  { bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', label: 'Agendado' },
+        rascunho:  { bg: 'rgb(205,180,219)', color: 'rgb(63,46,76)', label: 'Rascunho' },
+        postado:   { bg: 'rgb(168,213,186)', color: 'rgb(45,95,63)', label: 'Postado' },
+        cancelado: { bg: 'rgb(224,218,202)', color: 'rgb(140,123,107)', label: 'Cancelado' }
       };
 
       container.innerHTML = filtered.map(item => {
-        const badgeStyle = badgeColors[item.status] || badgeColors.rascunho;
+        const st = statusStyle[item.status] || statusStyle.rascunho;
         const canModify = item.status !== 'postado';
-        const thumbSrc = item.thumb_base64 || 'media/AC_gallery.png';
-
-        return `
-          <div class="flex gap-2.5 items-start border-b border-[#e0daca] pb-2.5 last:border-none last:pb-0">
-            <img src="${thumbSrc}" class="w-14 h-14 rounded-2xl object-cover bg-[#f5f0e8] flex-shrink-0" />
-            <div class="flex-1 min-w-0">
-              <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${badgeStyle}">${item.status}</span>
-              <div class="text-[10px] text-[#8c7b6b] font-bold mt-0.5">
-                📍 ${item.location || '—'} • ${item.date_occurred}
-              </div>
-              <div class="text-[10px] text-[#3d3d3d] font-bold">
-                🗓️ Postar: ${item.scheduled_post_date || '—'}
-              </div>
-              <p class="text-[11px] text-[#3d3d3d] truncate">${item.caption || 'Sem legenda'}</p>
-              ${canModify ? `
-                <div class="flex gap-1.5 mt-1.5">
-                  <button onclick="openEditModal('${item.id}')" class="bg-[#fde293] text-[#5a4b3c] text-[10px] font-bold px-2.5 py-0.5 rounded-full">Editar</button>
-                  ${item.status !== 'cancelado' ? `
-                    <button onclick="cancelScheduledPost('${item.id}')" class="bg-[#ee7b6d] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Cancelar</button>
-                  ` : ''}
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        `;
+        const sub = [
+          st.label,
+          item.location,
+          item.scheduled_post_date ? 'postar ' + fmtBR(item.scheduled_post_date) : null
+        ].filter(Boolean).join(' • ');
+        const cancelBtn = (canModify && item.status !== 'cancelado')
+          ? `<button onclick="event.stopPropagation(); cancelScheduledPost('${item.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Cancelar">${svgIcon('x', 'w-4 h-4', '#ee7b6d')}</button>`
+          : '';
+        return navRow({
+          onclick: canModify ? `openEditModal('${item.id}')` : '',
+          bg: st.bg, color: st.color, icon: 'camera',
+          thumb: item.thumb_base64,
+          title: item.caption || 'Sem legenda',
+          subtitle: sub,
+          actionHtml: cancelBtn,
+          chevron: canModify
+        });
       }).join('');
     }
 
@@ -1340,7 +1413,8 @@
 
     async function cancelScheduledPost(postId) {
       if (!navigator.onLine) return showNookToast('Offline!', 'media/AC_settings.png', 'redo');
-      if (!confirm("Cancelar o agendamento desta postagem?")) return;
+      const ok = await nookConfirm('A postagem não será publicada no horário agendado.', { title: 'Cancelar postagem?', okText: 'Cancelar post', cancelText: 'Manter', danger: true });
+      if (!ok) return;
 
       const webhook = localStorage.getItem('nook_webhook');
       try {
@@ -1406,11 +1480,13 @@
           container.innerHTML = "Todos os itens já subiram para o VPS.";
           return;
         }
-        container.innerHTML = pending.map(p => 
-          `<div class="border-b border-[#e0daca] pb-1">
-            📸 <strong>[${p.status}]</strong> ${p.date_occurred} → ${p.scheduled_post_date}
-          </div>`
-        ).join('');
+        container.innerHTML = pending.map(p => navRow({
+          bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'camera',
+          thumb: p.thumb_base64,
+          title: p.caption || 'Sem legenda',
+          subtitle: `${p.status} • ${fmtBR(p.date_occurred)} → ${fmtBR(p.scheduled_post_date)}`,
+          chevron: false
+        })).join('');
       };
     }
 
