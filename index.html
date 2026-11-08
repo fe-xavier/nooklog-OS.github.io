@@ -207,4 +207,990 @@
               <input type="number" id="manualHours" placeholder="0" min="0" oninput="previewRounding()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
             </div>
             <div>
-              <label class="text-[10px] font-bold text-[#8c7b6b
+              <label class="text-[10px] font-bold text-[#8c7b6b]">MINUTOS</label>
+              <input type="number" id="manualMinutes" placeholder="0" min="0" oninput="previewRounding()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
+            </div>
+          </div>
+          <div id="roundingPreview" class="text-[11px] text-[#8c7b6b] font-semibold mt-2">
+            Arredondado (múltiplo de 5): <strong class="text-[#3d3d3d]">0 min</strong> (0.0 mm)
+          </div>
+          <button onclick="saveManualTime()" class="w-full mt-2.5 bg-[#fde293] text-[#5a4b3c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">
+            Carimbar no Dia
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 2: ESCALA GEOMÉTRICA A3 (10m = 1mm)   -->
+      <!-- ========================================== -->
+      <section id="screen-scale" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_calculator.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Escala A3 (10m = 1mm)</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca] mb-3">
+          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Dia do Diagrama</label>
+          <input type="date" id="scaleDate" onchange="renderStats()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-1 mb-3 text-[#3d3d3d]">
+
+          <div class="bg-[#f5f0e8] rounded-2xl p-3 border border-[#e0daca] text-center">
+            <div class="text-[10px] font-bold text-[#8c7b6b] uppercase">Medida Total no Papel A3 (297x420mm)</div>
+            <div id="scaleTotalText" class="text-xl font-bold text-[#3d3d3d] mt-1">0.0 mm (0.00 cm)</div>
+          </div>
+
+          <div class="mt-3">
+            <div class="text-[10px] font-bold text-[#8c7b6b] uppercase mb-1.5">Medidas por Domínio</div>
+            <div id="categoryBreakdown" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 3: MÉTRICAS DO DIA (1440 MINUTOS)     -->
+      <!-- ========================================== -->
+      <section id="screen-stats" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_calendar.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Agenda & % do Dia</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca] mb-3">
+          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Selecionar Data</label>
+          <input type="date" id="statsDate" onchange="syncDateInputs(this.value); renderStats();" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-1 mb-3 text-[#3d3d3d]">
+
+          <div class="flex justify-between text-xs font-bold text-[#3d3d3d] mb-1">
+            <span id="dayMinutesText">0 / 1440 min</span>
+            <span id="dayPercentText">0.0% do dia</span>
+          </div>
+          <div class="w-full h-4 bg-[#f5f0e8] rounded-full overflow-hidden border border-[#e0daca]">
+            <div id="dayProgressFill" class="h-full bg-[#88d4ab] transition-all duration-300" style="width:0%"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div class="bg-[#f5f0e8] p-2 rounded-2xl border border-[#e0daca]">
+              <div class="text-[9px] font-bold text-[#8c7b6b]">SEMANA</div>
+              <div id="sumWeek" class="text-xs font-bold text-[#3d3d3d]">0m</div>
+            </div>
+            <div class="bg-[#f5f0e8] p-2 rounded-2xl border border-[#e0daca]">
+              <div class="text-[9px] font-bold text-[#8c7b6b]">MÊS</div>
+              <div id="sumMonth" class="text-xs font-bold text-[#3d3d3d]">0m</div>
+            </div>
+            <div class="bg-[#f5f0e8] p-2 rounded-2xl border border-[#e0daca]">
+              <div class="text-[9px] font-bold text-[#8c7b6b]">ANO</div>
+              <div id="sumYear" class="text-xs font-bold text-[#3d3d3d]">0m</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 4: STREAKS, RECORDES E TAGS           -->
+      <!-- ========================================== -->
+      <section id="screen-records" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_health.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Streaks & Performance</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-4 shadow-sm border border-[#e0daca]">
+          <div class="grid grid-cols-2 gap-2.5 mb-3">
+            <div class="bg-[#f5f0e8] p-3 rounded-2xl border border-[#e0daca] text-center">
+              <div class="text-[10px] font-bold text-[#8c7b6b]">🔥 STREAK ATUAL</div>
+              <div class="text-lg font-bold text-[#3d3d3d]"><span id="streakCount">0</span> dias</div>
+            </div>
+            <div class="bg-[#f5f0e8] p-3 rounded-2xl border border-[#e0daca] text-center">
+              <div class="text-[10px] font-bold text-[#8c7b6b]">⭐ RECORDE DIÁRIO</div>
+              <div class="text-lg font-bold text-[#3d3d3d]"><span id="recordDay">0</span> min</div>
+            </div>
+          </div>
+
+          <div class="text-[10px] font-bold text-[#8c7b6b] uppercase mb-1.5">Tags Automáticas</div>
+          <div id="autoTags" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 5: DIÁRIO (FOTO + ATRASO 7d / 30d)    -->
+      <!-- ========================================== -->
+      <section id="screen-diary" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_camera.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Novo Registro no Diário</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] space-y-2">
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Foto ou Mídia</label>
+            <input type="file" id="diaryPhoto" accept="image/*" onchange="compressImage(event)" class="w-full text-[11px] bg-[#f5f0e8] border border-[#e0daca] rounded-xl p-1.5 mt-0.5">
+            <img id="photoPreview" class="w-full h-32 object-cover rounded-2xl mt-2 hidden border border-[#e0daca]" />
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Legenda</label>
+            <textarea id="diaryCaption" rows="2" placeholder="Escreva sobre este registro..." class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl p-2 mt-0.5"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Local</label>
+              <input type="text" id="diaryLocation" placeholder="Ateliê, Lab..." class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Dia que ocorreu</label>
+              <input type="date" id="diaryDateOccurred" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 mt-0.5">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Status</label>
+              <select id="diarySaveMode" onchange="toggleDelaySelect()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 mt-0.5">
+                <option value="agendado">Agendar Post</option>
+                <option value="rascunho">Rascunho</option>
+              </select>
+            </div>
+            <div id="delayBox">
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Atraso</label>
+              <select id="diaryDelay" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 mt-0.5">
+                <option value="7">+1 Semana (7d)</option>
+                <option value="30">+1 Mês (30d)</option>
+              </select>
+            </div>
+          </div>
+
+          <button onclick="saveDiaryEntry()" class="w-full bg-[#f7b299] text-[#4a3228] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">
+            Guardar no Diário
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 6: ACERVO NO VPS (EDITAR / CANCELAR)  -->
+      <!-- ========================================== -->
+      <section id="screen-archive" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_gallery.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Acervo no VPS</h2>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="playNookSound('redo'); fetchVPSArchive();" class="text-xs font-bold text-[#3d3d3d] bg-[#8ecae6] px-2.5 py-1 rounded-full">↻</button>
+            <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+          </div>
+        </div>
+
+        <div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-2">
+          <button onclick="setArchiveFilter('todos', this)" class="filter-btn bg-[#3d3d3d] text-white text-[10px] font-bold px-3 py-1 rounded-full">Todos</button>
+          <button onclick="setArchiveFilter('agendado', this)" class="filter-btn bg-[#e8e0d0] text-[#3d3d3d] text-[10px] font-bold px-3 py-1 rounded-full">Agendados</button>
+          <button onclick="setArchiveFilter('rascunho', this)" class="filter-btn bg-[#e8e0d0] text-[#3d3d3d] text-[10px] font-bold px-3 py-1 rounded-full">Rascunhos</button>
+          <button onclick="setArchiveFilter('postado', this)" class="filter-btn bg-[#e8e0d0] text-[#3d3d3d] text-[10px] font-bold px-3 py-1 rounded-full">Postados</button>
+        </div>
+
+        <div id="archiveOfflineNotice" class="hidden bg-[#fde293] text-[#5a4b3c] text-xs font-bold p-3 rounded-2xl mb-2">
+          ⚠️ Modo Offline: conecte o Wi-Fi para ver, editar ou cancelar itens do VPS.
+        </div>
+
+        <div id="archiveContainer" class="bg-[#fffdf9] rounded-3xl p-3 shadow-sm border border-[#e0daca] space-y-2.5 text-xs text-[#8c7b6b]">
+          Toque em ↻ para buscar os registros do servidor.
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 7: FILA OFFLINE & CONFIGURAÇÃO VPS    -->
+      <!-- ========================================== -->
+      <section id="screen-sync" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_settings.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Sincronia & Webhook</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3 space-y-2">
+          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">URL do Webhook no n8n</label>
+          <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nook" onchange="saveWebhookUrl()" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="syncQueueWithVPS(true)" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95">
+              ☁️ Sincronizar
+            </button>
+            <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95">
+              💾 Backup JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca]">
+          <div class="text-xs font-bold text-[#3d3d3d] mb-1.5">Fila Local no Aparelho</div>
+          <div id="pendingList" class="text-[11px] text-[#8c7b6b] space-y-1.5">Nenhum item pendente.</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE ITEM DO ACERVO -->
+    <div id="editModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
+        <h3 class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Registro do VPS</h3>
+        <input type="hidden" id="editPostId">
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">STATUS</label>
+          <select id="editStatus" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+            <option value="agendado">Agendado para Postar</option>
+            <option value="rascunho">Rascunho (Pausado)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">DATA DE DISPARO</label>
+          <input type="date" id="editScheduledDate" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">LOCAL</label>
+          <input type="text" id="editLocation" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-[#8c7b6b]">LEGENDA</label>
+          <textarea id="editCaption" rows="3" class="w-full text-xs font-semibold bg-[#fffdf9] border border-[#e0daca] rounded-xl p-2"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="submitArchiveEdit()" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl">Salvar</button>
+          <button onclick="closeEditModal()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RODAPÉ EM PÍLULA EXATO DO NOOKPHONE -->
+    <div class="flex items-center justify-center py-2.5 px-4 border-t border-[#e0daca]">
+      <button onclick="goHome()" ondblclick="forceClearCache()" class="inline-block px-4 py-1 border border-[#e0daca] rounded-full text-xs text-[#c7beaa] active:scale-95 transition-transform">
+        <span id="footerPillText" class="font-bold text-[#c7beaa]">Toque para Home • 2x limpa cache</span>
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. SONS DO NOOKPHONE (media/sound/)
+    // ==========================================
+    const SOUND_PATHS = {
+      phoneOpen: 'media/sound/UI_Phone_Open.wav',
+      appStart: 'media/sound/UI_Phone_Start_4.wav',
+      menuOpen: 'media/sound/UI_PocketMenu_Open.wav',
+      menuClose: 'media/sound/UI_PocketMenu_Close.wav',
+      flag: 'media/sound/UI_Point_Flag.wav',
+      pointGet: 'media/sound/UI_Point_Get.wav',
+      stamp: 'media/sound/UI_Point_Stamp.wav',
+      postDelete: 'media/sound/UI_Post_Delete.wav',
+      postMove: 'media/sound/UI_Post_MovePresent.wav',
+      redo: 'media/sound/UI_Redo.wav',
+      scroll: 'media/sound/UI_Scroll.wav',
+      select: 'media/sound/UI_Select.wav',
+      balloon: 'media/sound/UI_Swkbd_BalloonAppear.wav',
+      enter: 'media/sound/UI_Swkbd_Enter.wav',
+      wait: 'media/sound/UI_Wait.wav',
+      nookSend: 'media/sound/Nook Send.mp3',
+      nookTritone: 'media/sound/Nook Tritone.mp3'
+    };
+
+    const audioCache = {};
+    let soundMuted = localStorage.getItem('nook_muted') === 'true';
+
+    function initSounds() {
+      Object.entries(SOUND_PATHS).forEach(([key, path]) => {
+        const a = new Audio(encodeURI(path));
+        a.preload = 'auto';
+        audioCache[key] = a;
+      });
+      updateSoundUI();
+    }
+
+    function playNookSound(name) {
+      if (soundMuted || !audioCache[name]) return;
+      try {
+        const snd = audioCache[name];
+        snd.currentTime = 0;
+        snd.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    function toggleMute() {
+      soundMuted = !soundMuted;
+      localStorage.setItem('nook_muted', soundMuted);
+      updateSoundUI();
+      showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'nookTritone');
+    }
+
+    function updateSoundUI() {
+      const svgPath = document.querySelector('#locSvg path');
+      if (svgPath) svgPath.setAttribute('fill', soundMuted ? '#e5c5bc' : '#88d4ab');
+    }
+
+    let toastTimer = null;
+    function showNookToast(msg, icon = 'media/AC_froggychair.png', soundKey = 'balloon') {
+      if (soundKey) playNookSound(soundKey);
+      const t = document.getElementById('nookToast');
+      document.getElementById('toastIcon').src = icon;
+      document.getElementById('toastText').textContent = msg;
+      t.classList.remove('opacity-0');
+      t.classList.add('opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        t.classList.remove('opacity-100');
+        t.classList.add('opacity-0');
+      }, 2600);
+    }
+
+    // Força limpeza do cache antigo caso dê 2 cliques no rodapé
+    async function forceClearCache() {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const k of keys) await caches.delete(k);
+      }
+      location.reload(true);
+    }
+
+    // ==========================================
+    // 2. RELÓGIO NO FORMATO DO NOOKPHONE
+    // ==========================================
+    function updateNookClock() {
+      const now = new Date();
+      let hrs = now.getHours();
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hrs >= 12 ? 'PM' : 'AM';
+      hrs = hrs % 12 || 12;
+
+      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+      const months = ['JAN.', 'FEB.', 'MAR.', 'APR.', 'MAY', 'JUN.', 'JUL.', 'AUG.', 'SEP.', 'OCT.', 'NOV.', 'DEC.'];
+
+      document.getElementById('clockTime').textContent = `${hrs}:${mins}`;
+      document.getElementById('clockAmPm').textContent = ampm;
+      document.getElementById('clockDate').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+    }
+    setInterval(updateNookClock, 1000);
+    updateNookClock();
+
+    // ==========================================
+    // 3. BANCO DE DADOS LOCAL (INDEXEDDB)
+    // ==========================================
+    let db;
+    let vpsArchiveItems = [];
+    let currentArchiveFilter = 'todos';
+
+    const request = indexedDB.open("NookLogDB", 2);
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("timeLogs")) db.createObjectStore("timeLogs", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("diaryQueue")) db.createObjectStore("diaryQueue", { keyPath: "id" });
+    };
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      updateQueueCounter();
+      renderStats();
+    };
+
+    function todayISO() {
+      const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+      return (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+    }
+
+    function syncDateInputs(val) {
+      document.getElementById('statsDate').value = val;
+      document.getElementById('scaleDate').value = val;
+    }
+
+    document.getElementById('timeDate').value = todayISO();
+    document.getElementById('statsDate').value = todayISO();
+    document.getElementById('scaleDate').value = todayISO();
+    document.getElementById('diaryDateOccurred').value = todayISO();
+    document.getElementById('webhookUrl').value = localStorage.getItem('nook_webhook') || '';
+
+    // ==========================================
+    // 4. NAVEGAÇÃO ENTRE APLICATIVOS
+    // ==========================================
+    function openApp(screenId, label) {
+      playNookSound('appStart');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      document.getElementById('footerPillText').textContent = `${label} • Toque para Home`;
+      if (screenId === 'screen-stats' || screenId === 'screen-scale' || screenId === 'screen-records') renderStats();
+      if (screenId === 'screen-sync') renderPendingQueue();
+      if (screenId === 'screen-archive') fetchVPSArchive();
+    }
+
+    function goHome() {
+      const isHome = document.getElementById('screen-home').classList.contains('active');
+      playNookSound(isHome ? 'phoneOpen' : 'menuClose');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-home').classList.add('active');
+      renderStats();
+    }
+
+    function quickWellbeingStamp() {
+      document.getElementById('timeDate').value = todayISO();
+      document.getElementById('timeCategory').value = 'Bem-estar';
+      storeTimeEntry(15);
+    }
+
+    // ==========================================
+    // 5. MÓDULO DE TEMPO (MÚLTIPLOS DE 5)
+    // ==========================================
+    function roundTo5(minutes) {
+      const r = Math.round(minutes / 5) * 5;
+      return r === 0 && minutes > 0 ? 5 : r;
+    }
+
+    function previewRounding() {
+      playNookSound('scroll');
+      const h = parseInt(document.getElementById('manualHours').value) || 0;
+      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
+      const rounded = roundTo5((h * 60) + m);
+      document.getElementById('roundingPreview').innerHTML = 
+        `Arredondado (múltiplo de 5): <strong class="text-[#3d3d3d]">${rounded} min</strong> (${(rounded/10).toFixed(1)} mm)`;
+    }
+
+    function saveManualTime() {
+      const h = parseInt(document.getElementById('manualHours').value) || 0;
+      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
+      const totalRaw = (h * 60) + m;
+      if (totalRaw <= 0) return showNookToast('Insira um tempo válido!', 'media/AC_clock.png', 'redo');
+      storeTimeEntry(roundTo5(totalRaw));
+      document.getElementById('manualHours').value = '';
+      document.getElementById('manualMinutes').value = '';
+      previewRounding();
+    }
+
+    let timerInterval = null;
+    let timerStart = null;
+
+    function toggleTimer() {
+      const btn = document.getElementById('btnToggleTimer');
+      if (!timerInterval) {
+        playNookSound('flag');
+        timerStart = Date.now();
+        btn.textContent = "⏹ Parar e Carimbar";
+        btn.className = "w-full bg-[#ee7b6d] text-white font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform";
+        timerInterval = setInterval(() => {
+          const diffSec = Math.floor((Date.now() - timerStart) / 1000);
+          const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+          const secs = String(diffSec % 60).padStart(2, '0');
+          document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        const elapsedMin = (Date.now() - timerStart) / 60000;
+        btn.textContent = "▶ Iniciar Timer";
+        btn.className = "w-full bg-[#88d4ab] text-[#2d4739] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform";
+        document.getElementById('timerDisplay').textContent = "00:00:00";
+        storeTimeEntry(roundTo5(elapsedMin));
+      }
+    }
+
+    function storeTimeEntry(minutes) {
+      const entry = {
+        action: "create_time",
+        id: "time_" + Date.now(),
+        date: document.getElementById('timeDate').value,
+        category: document.getElementById('timeCategory').value,
+        minutes: minutes,
+        mm_scale: Number((minutes / 10).toFixed(2)),
+        synced: false
+      };
+      const tx = db.transaction("timeLogs", "readwrite");
+      tx.objectStore("timeLogs").put(entry);
+      tx.oncomplete = () => {
+        showNookToast(`+${minutes}m (${entry.mm_scale}mm) em ${entry.category}!`, 'media/AC_clock.png', 'pointGet');
+        updateQueueCounter();
+        renderStats();
+      };
+    }
+
+    // ==========================================
+    // 6. ESTATÍSTICAS, ESCALA A3 E STREAKS
+    // ==========================================
+    function renderStats() {
+      if (!db) return;
+      const targetDate = document.getElementById('statsDate').value || todayISO();
+      const tx = db.transaction("timeLogs", "readonly");
+      const req = tx.objectStore("timeLogs").getAll();
+
+      req.onsuccess = () => {
+        const logs = req.result;
+        const dayLogs = logs.filter(l => l.date === targetDate);
+        const dayTotal = dayLogs.reduce((acc, cur) => acc + cur.minutes, 0);
+        const dayPercent = ((dayTotal / 1440) * 100).toFixed(1);
+
+        document.getElementById('dayMinutesText').textContent = `${dayTotal} / 1440 min`;
+        document.getElementById('dayPercentText').textContent = `${dayPercent}% do dia`;
+        document.getElementById('dayProgressFill').style.width = `${Math.min(dayPercent, 100)}%`;
+        document.getElementById('scaleTotalText').textContent = 
+          `${(dayTotal / 10).toFixed(1)} mm (${(dayTotal / 100).toFixed(2)} cm)`;
+
+        // Atualiza barra inferior na Home com resumo do dia atual
+        const todaySum = logs.filter(l => l.date === todayISO()).reduce((a, c) => a + c.minutes, 0);
+        if (document.getElementById('screen-home').classList.contains('active')) {
+          document.getElementById('footerPillText').textContent = 
+            `Hoje: ${todaySum}m • ${(todaySum/10).toFixed(1)}mm (${((todaySum/1440)*100).toFixed(1)}%)`;
+        }
+
+        const catTotals = {};
+        dayLogs.forEach(l => catTotals[l.category] = (catTotals[l.category] || 0) + l.minutes);
+        document.getElementById('categoryBreakdown').innerHTML = Object.entries(catTotals)
+          .map(([cat, min]) => `<span class="bg-[#f5f0e8] border border-[#e0daca] px-2.5 py-1 rounded-full text-[11px] font-bold text-[#3d3d3d]">${cat}: ${min}m (${(min/10).toFixed(1)}mm)</span>`)
+          .join('') || '<span class="text-xs text-[#8c7b6b]">Sem registros nesta data.</span>';
+
+        const mapByDate = {};
+        logs.forEach(l => mapByDate[l.date] = (mapByDate[l.date] || 0) + l.minutes);
+        const allDailyTotals = Object.values(mapByDate);
+        document.getElementById('recordDay').textContent = allDailyTotals.length ? Math.max(...allDailyTotals) : 0;
+
+        let streak = 0;
+        let checkDate = new Date(todayISO() + "T12:00:00");
+        while (true) {
+          const iso = checkDate.toISOString().split('T')[0];
+          if (mapByDate[iso] && mapByDate[iso] > 0) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+        document.getElementById('streakCount').textContent = streak;
+
+        const curMonth = targetDate.slice(0, 7);
+        const curYear = targetDate.slice(0, 4);
+        const nowMs = new Date(targetDate + "T12:00:00").getTime();
+
+        let weekSum = 0, monthSum = 0, yearSum = 0;
+        logs.forEach(l => {
+          const diffDays = (nowMs - new Date(l.date + "T12:00:00").getTime()) / 86400000;
+          if (diffDays >= 0 && diffDays < 7) weekSum += l.minutes;
+          if (l.date.startsWith(curMonth)) monthSum += l.minutes;
+          if (l.date.startsWith(curYear)) yearSum += l.minutes;
+        });
+        document.getElementById('sumWeek').textContent = `${weekSum}m`;
+        document.getElementById('sumMonth').textContent = `${monthSum}m`;
+        document.getElementById('sumYear').textContent = `${yearSum}m`;
+
+        const tags = [];
+        if (dayTotal >= 360) tags.push("⚡ Alta Densidade (+25%)");
+        if (streak >= 3) tags.push(`🔥 Streak ${streak}d`);
+        if ((catTotals["Pesquisa"] || 0) >= 120) tags.push("🔬 Foco Pesquisa");
+        if ((catTotals["Bem-estar"] || 0) >= 30) tags.push("🌿 Equilíbrio");
+        if (tags.length === 0) tags.push("🌱 Dia em Construção");
+        document.getElementById('autoTags').innerHTML = tags
+          .map(t => `<span class="bg-[#f5f0e8] border border-[#e0daca] px-2.5 py-1 rounded-full text-[11px] font-bold text-[#3d3d3d]">${t}</span>`)
+          .join('');
+      };
+    }
+
+    // ==========================================
+    // 7. DIÁRIO E COMPRESSÃO DE IMAGEM
+    // ==========================================
+    let currentFullBase64 = null;
+    let currentThumbBase64 = null;
+
+    function toggleDelaySelect() {
+      playNookSound('scroll');
+      const mode = document.getElementById('diarySaveMode').value;
+      document.getElementById('delayBox').style.visibility = (mode === 'agendado') ? 'visible' : 'hidden';
+    }
+
+    function compressImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      playNookSound('select');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvasFull = document.createElement('canvas');
+          const scaleFull = img.width > 1080 ? 1080 / img.width : 1;
+          canvasFull.width = img.width * scaleFull;
+          canvasFull.height = img.height * scaleFull;
+          canvasFull.getContext('2d').drawImage(img, 0, 0, canvasFull.width, canvasFull.height);
+          currentFullBase64 = canvasFull.toDataURL('image/jpeg', 0.72);
+
+          const canvasThumb = document.createElement('canvas');
+          const scaleThumb = img.width > 240 ? 240 / img.width : 1;
+          canvasThumb.width = img.width * scaleThumb;
+          canvasThumb.height = img.height * scaleThumb;
+          canvasThumb.getContext('2d').drawImage(img, 0, 0, canvasThumb.width, canvasThumb.height);
+          currentThumbBase64 = canvasThumb.toDataURL('image/jpeg', 0.6);
+
+          const preview = document.getElementById('photoPreview');
+          preview.src = currentThumbBase64;
+          preview.classList.remove('hidden');
+          showNookToast('Foto pronta!', 'media/AC_camera.png', 'enter');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveDiaryEntry() {
+      const caption = document.getElementById('diaryCaption').value.trim();
+      const dateOccurred = document.getElementById('diaryDateOccurred').value;
+      const statusMode = document.getElementById('diarySaveMode').value;
+      const delayDays = parseInt(document.getElementById('diaryDelay').value);
+
+      if (!currentFullBase64 && !caption) {
+        return showNookToast('Adicione foto ou legenda!', 'media/AC_camera.png', 'redo');
+      }
+
+      const targetDateObj = new Date(dateOccurred + "T12:00:00");
+      targetDateObj.setDate(targetDateObj.getDate() + delayDays);
+      const scheduledDate = targetDateObj.toISOString().split('T')[0];
+
+      const entry = {
+        action: "create_post",
+        id: "post_" + Date.now(),
+        date_occurred: dateOccurred,
+        scheduled_post_date: scheduledDate,
+        status: statusMode,
+        location: document.getElementById('diaryLocation').value.trim(),
+        caption: caption,
+        thumb_base64: currentThumbBase64,
+        image_base64: currentFullBase64,
+        synced: false
+      };
+
+      const tx = db.transaction("diaryQueue", "readwrite");
+      tx.objectStore("diaryQueue").put(entry);
+      tx.oncomplete = () => {
+        showNookToast(
+          statusMode === 'rascunho' ? 'Salvo como Rascunho!' : `Agendado: ${scheduledDate}`,
+          'media/AC_post.png',
+          'stamp'
+        );
+        document.getElementById('diaryCaption').value = '';
+        document.getElementById('diaryLocation').value = '';
+        document.getElementById('photoPreview').classList.add('hidden');
+        currentFullBase64 = null;
+        currentThumbBase64 = null;
+        updateQueueCounter();
+        if (navigator.onLine) syncQueueWithVPS(false);
+      };
+    }
+
+    // ==========================================
+    // 8. ACERVO DO VPS (LISTAR, EDITAR, CANCELAR)
+    // ==========================================
+    function setArchiveFilter(filter, btnEl) {
+      playNookSound('scroll');
+      currentArchiveFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = "filter-btn bg-[#e8e0d0] text-[#3d3d3d] text-[10px] font-bold px-3 py-1 rounded-full";
+      });
+      btnEl.className = "filter-btn bg-[#3d3d3d] text-white text-[10px] font-bold px-3 py-1 rounded-full";
+      renderArchiveList();
+    }
+
+    async function fetchVPSArchive() {
+      const webhook = localStorage.getItem('nook_webhook');
+      const notice = document.getElementById('archiveOfflineNotice');
+      const container = document.getElementById('archiveContainer');
+
+      if (!navigator.onLine) {
+        notice.classList.remove('hidden');
+        return;
+      }
+      notice.classList.add('hidden');
+
+      if (!webhook) {
+        container.innerHTML = `<p>Configure a URL do Webhook no app Ajustes primeiro.</p>`;
+        return;
+      }
+
+      playNookSound('wait');
+      container.innerHTML = `<p>⏳ Buscando acervo no VPS...</p>`;
+
+      try {
+        await syncQueueWithVPS(false);
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "list_posts" })
+        });
+        const data = await resp.json();
+        vpsArchiveItems = Array.isArray(data) ? data : (data.items || []);
+        renderArchiveList();
+      } catch (err) {
+        container.innerHTML = `<p class="text-[#ee7b6d] font-bold">Falha ao conectar no VPS. Verifique o Webhook.</p>`;
+      }
+    }
+
+    function renderArchiveList() {
+      const container = document.getElementById('archiveContainer');
+      const filtered = vpsArchiveItems.filter(item => {
+        if (currentArchiveFilter === 'todos') return true;
+        return item.status === currentArchiveFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p>Nenhum registro encontrado neste filtro.</p>`;
+        return;
+      }
+
+      const badgeColors = {
+        agendado: 'bg-[#fde293] text-[#5a4b3c]',
+        rascunho: 'bg-[#cdb4db] text-[#3f2e4c]',
+        postado: 'bg-[#88d4ab] text-[#244232]',
+        cancelado: 'bg-[#e0daca] text-[#8c7b6b] line-through'
+      };
+
+      container.innerHTML = filtered.map(item => {
+        const badgeStyle = badgeColors[item.status] || badgeColors.rascunho;
+        const canModify = item.status !== 'postado';
+        const thumbSrc = item.thumb_base64 || 'media/AC_gallery.png';
+
+        return `
+          <div class="flex gap-2.5 items-start border-b border-[#e0daca] pb-2.5 last:border-none last:pb-0">
+            <img src="${thumbSrc}" class="w-14 h-14 rounded-2xl object-cover bg-[#f5f0e8] flex-shrink-0" />
+            <div class="flex-1 min-w-0">
+              <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${badgeStyle}">${item.status}</span>
+              <div class="text-[10px] text-[#8c7b6b] font-bold mt-0.5">
+                📍 ${item.location || '—'} • ${item.date_occurred}
+              </div>
+              <div class="text-[10px] text-[#3d3d3d] font-bold">
+                🗓️ Postar: ${item.scheduled_post_date || '—'}
+              </div>
+              <p class="text-[11px] text-[#3d3d3d] truncate">${item.caption || 'Sem legenda'}</p>
+              ${canModify ? `
+                <div class="flex gap-1.5 mt-1.5">
+                  <button onclick="openEditModal('${item.id}')" class="bg-[#fde293] text-[#5a4b3c] text-[10px] font-bold px-2.5 py-0.5 rounded-full">Editar</button>
+                  ${item.status !== 'cancelado' ? `
+                    <button onclick="cancelScheduledPost('${item.id}')" class="bg-[#ee7b6d] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Cancelar</button>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditModal(postId) {
+      if (!navigator.onLine) return showNookToast('Conecte o Wi-Fi para editar!', 'media/AC_settings.png', 'redo');
+      const item = vpsArchiveItems.find(i => String(i.id) === String(postId));
+      if (!item) return;
+
+      playNookSound('menuOpen');
+      document.getElementById('editPostId').value = item.id;
+      document.getElementById('editStatus').value = item.status === 'cancelado' ? 'rascunho' : item.status;
+      document.getElementById('editScheduledDate').value = item.scheduled_post_date;
+      document.getElementById('editLocation').value = item.location || '';
+      document.getElementById('editCaption').value = item.caption || '';
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      playNookSound('menuClose');
+      document.getElementById('editModal').classList.add('hidden');
+    }
+
+    async function submitArchiveEdit() {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine) return showNookToast('Sem conexão!', 'media/AC_settings.png', 'redo');
+
+      const payload = {
+        action: "update_post",
+        id: document.getElementById('editPostId').value,
+        status: document.getElementById('editStatus').value,
+        scheduled_post_date: document.getElementById('editScheduledDate').value,
+        location: document.getElementById('editLocation').value.trim(),
+        caption: document.getElementById('editCaption').value.trim()
+      };
+
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          closeEditModal();
+          showNookToast('Atualizado no VPS!', 'media/AC_post.png', 'postMove');
+          fetchVPSArchive();
+        }
+      } catch (err) {
+        showNookToast('Erro ao atualizar.', 'media/AC_settings.png', 'redo');
+      }
+    }
+
+    async function cancelScheduledPost(postId) {
+      if (!navigator.onLine) return showNookToast('Offline!', 'media/AC_settings.png', 'redo');
+      if (!confirm("Cancelar o agendamento desta postagem?")) return;
+
+      const webhook = localStorage.getItem('nook_webhook');
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "cancel_post", id: postId })
+        });
+        if (resp.ok) {
+          showNookToast('Postagem cancelada!', 'media/AC_post.png', 'postDelete');
+          fetchVPSArchive();
+        }
+      } catch (err) {
+        showNookToast('Erro ao cancelar.', 'media/AC_settings.png', 'redo');
+      }
+    }
+
+    // ==========================================
+    // 9. SINCRONIZAÇÃO OFFLINE -> VPS
+    // ==========================================
+    function saveWebhookUrl() {
+      localStorage.setItem('nook_webhook', document.getElementById('webhookUrl').value.trim());
+      showNookToast('Webhook salvo!', 'media/AC_settings.png', 'enter');
+    }
+
+    function updateNetworkUI() {
+      const dot = document.getElementById('netDot');
+      if (navigator.onLine) {
+        if (dot) dot.setAttribute('fill', '#88d4ab');
+        syncQueueWithVPS(false);
+      } else {
+        if (dot) dot.setAttribute('fill', '#f7b299');
+      }
+    }
+    window.addEventListener('online', updateNetworkUI);
+    window.addEventListener('offline', updateNetworkUI);
+
+    function updateQueueCounter() {
+      if (!db) return;
+      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
+      const r1 = tx.objectStore("timeLogs").getAll();
+      const r2 = tx.objectStore("diaryQueue").getAll();
+      tx.oncomplete = () => {
+        const total = r1.result.filter(i => !i.synced).length + r2.result.filter(i => !i.synced).length;
+        const badge = document.getElementById('badgeQueue');
+        if (total > 0) {
+          badge.textContent = total;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      };
+    }
+
+    function renderPendingQueue() {
+      if (!db) return;
+      const tx = db.transaction("diaryQueue", "readonly");
+      const req = tx.objectStore("diaryQueue").getAll();
+      req.onsuccess = () => {
+        const pending = req.result.filter(i => !i.synced);
+        const container = document.getElementById('pendingList');
+        if (pending.length === 0) {
+          container.innerHTML = "Todos os itens já subiram para o VPS.";
+          return;
+        }
+        container.innerHTML = pending.map(p => 
+          `<div class="border-b border-[#e0daca] pb-1">
+            📸 <strong>[${p.status}]</strong> ${p.date_occurred} → ${p.scheduled_post_date}
+          </div>`
+        ).join('');
+      };
+    }
+
+    async function syncQueueWithVPS(manual = false) {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine || !db) {
+        if (manual) showNookToast('Configure o Webhook / Wi-Fi!', 'media/AC_settings.png', 'redo');
+        return;
+      }
+      if (manual) playNookSound('nookSend');
+
+      let sent = 0;
+      const txDiary = db.transaction("diaryQueue", "readonly");
+      const diaryItems = await new Promise(res => {
+        const r = txDiary.objectStore("diaryQueue").getAll();
+        r.onsuccess = () => res(r.result.filter(i => !i.synced));
+      });
+
+      for (const item of diaryItems) {
+        try {
+          const resp = await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          if (resp.ok) {
+            sent++;
+            db.transaction("diaryQueue", "readwrite").objectStore("diaryQueue").delete(item.id);
+          }
+        } catch (e) {}
+      }
+
+      const txTime = db.transaction("timeLogs", "readonly");
+      const timeItems = await new Promise(res => {
+        const r = txTime.objectStore("timeLogs").getAll();
+        r.onsuccess = () => res(r.result.filter(i => !i.synced));
+      });
+
+      for (const item of timeItems) {
+        try {
+          const resp = await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          if (resp.ok) {
+            sent++;
+            item.synced = true;
+            db.transaction("timeLogs", "readwrite").objectStore("timeLogs").put(item);
+          }
+        } catch (e) {}
+      }
+
+      updateQueueCounter();
+      renderPendingQueue();
+      if (sent > 0 || manual) showNookToast(`Sincronizado (${sent})!`, 'media/AC_froggychair.png', 'nookTritone');
+    }
+
+    function exportBackupJson() {
+      playNookSound('select');
+      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
+      const r1 = tx.objectStore("timeLogs").getAll();
+      const r2 = tx.objectStore("diaryQueue").getAll();
+      tx.oncomplete = () => {
+        const blob = new Blob([JSON.stringify({ timeLogs: r1.result, diaryQueue: r2.result }, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `nookphone-backup-${todayISO()}.json`;
+        a.click();
+      };
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => reg.update());
+    }
+    initSounds();
+    updateNetworkUI();
+  </script>
+</body>
+</html>
