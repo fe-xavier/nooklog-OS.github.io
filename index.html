@@ -119,7 +119,10 @@
 
             <div class="animate-fade-in-up-slow">
               <button onclick="openApp('screen-time', 'Timer')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 relative w-full">
-                <img alt="Timer" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_clock.png">
+                <div class="relative">
+                  <img alt="Timer" width="80" height="80" class="w-[76px] h-[76px] object-contain drop-shadow-md" src="media/AC_clock.png">
+                  <span id="timerDot" class="hidden absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-[#88d4ab] animate-pulse" style="box-shadow:0 0 0 2px #fff"></span>
+                </div>
                 <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Timer</span>
               </button>
             </div>
@@ -401,8 +404,8 @@
           <div>
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Foto ou Mídia</label>
             <div class="grid grid-cols-2 gap-2 mt-0.5">
-              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryCamera').click()" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="camera" class="ic"></span>Tirar agora</button>
-              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryUpload').click()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="image" class="ic"></span>Enviar</button>
+              <button type="button" onclick="openFilePicker('diaryCamera')" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="camera" class="ic"></span>Tirar agora</button>
+              <button type="button" onclick="openFilePicker('diaryUpload')" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5" data-snd="select"><span data-icon="image" class="ic"></span>Enviar</button>
             </div>
             <input type="file" id="diaryCamera" accept="image/*,video/*" capture="environment" onchange="handleMedia(event)" class="hidden">
             <input type="file" id="diaryUpload" accept="image/*,video/*" onchange="handleMedia(event)" class="hidden">
@@ -798,18 +801,19 @@
       return !!(document.fullscreenElement || document.webkitFullscreenElement);
     }
 
+    let lastPickerAt = 0; // quando o seletor de foto/câmera foi aberto (a tela cheia espera ele)
+
     function goFullscreen() {
       if (isFullscreenNow()) return;
+      if (Date.now() - lastPickerAt < 1500) return; // pedir tela cheia junto com o seletor cancela o seletor
       const el = document.documentElement;
       const rf = el.requestFullscreen || el.webkitRequestFullscreen;
       if (!rf) return;
       try { Promise.resolve(rf.call(el)).catch(() => {}); } catch (e) {}
     }
 
-    // Listener permanente (o navegador só aceita dentro de um gesto do usuário)
-    ['pointerup', 'touchend', 'click'].forEach(ev =>
-      document.addEventListener(ev, goFullscreen, { passive: true })
-    );
+    // Só no 'click' (um único pedido por toque; o navegador só aceita dentro de um gesto do usuário)
+    document.addEventListener('click', goFullscreen, { passive: true });
     ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev =>
       document.addEventListener(ev, scheduleHeightFix)
     );
@@ -1284,31 +1288,65 @@
 
     let timerInterval = null;
     let timerStart = null;
+    const TIMER_KEY = 'nook_timer'; // guarda o início do timer: sobrevive a fechar o app ou recarregar
+
+    function tickTimer() {
+      const diffSec = Math.max(0, Math.floor((Date.now() - timerStart) / 1000));
+      const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+      const secs = String(diffSec % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+    }
+
+    function startTimerTick() {
+      clearInterval(timerInterval);
+      tickTimer();
+      timerInterval = setInterval(tickTimer, 1000);
+      setTimerButton(true);
+    }
+
+    // Ao abrir o app, retoma um timer que ficou rodando
+    function restoreTimer() {
+      try {
+        const st = JSON.parse(localStorage.getItem(TIMER_KEY));
+        if (st && Number.isFinite(st.start)) {
+          timerStart = st.start;
+          if (st.date) document.getElementById('timeDate').value = st.date;
+          if (st.category) populateCategorySelects(st.category);
+          startTimerTick();
+        }
+      } catch (e) {}
+    }
+
+    // Ao voltar para o app, o relógio do timer se acerta na hora (aba em segundo plano atrasa o intervalo)
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && timerInterval) tickTimer(); });
 
     function setTimerButton(running) {
       const btn = document.getElementById('btnToggleTimer');
       btn.className = 'w-full font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5 ' +
         (running ? 'bg-[#ee7b6d] text-white' : 'bg-[#88d4ab] text-[#2d4739]');
       btn.innerHTML = svgIcon(running ? 'square' : 'play', 'w-3.5 h-3.5', 'currentColor') + (running ? 'Parar e Carimbar' : 'Iniciar Timer');
+      const dot = document.getElementById('timerDot');
+      if (dot) dot.classList.toggle('hidden', !running);
     }
 
     function toggleTimer() {
-      const btn = document.getElementById('btnToggleTimer');
       if (!timerInterval) {
         playNookSound('flag');
         timerStart = Date.now();
-        setTimerButton(true);
-        timerInterval = setInterval(() => {
-          const diffSec = Math.floor((Date.now() - timerStart) / 1000);
-          const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
-          const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
-          const secs = String(diffSec % 60).padStart(2, '0');
-          document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
-        }, 1000);
+        try {
+          localStorage.setItem(TIMER_KEY, JSON.stringify({
+            start: timerStart,
+            date: document.getElementById('timeDate').value,
+            category: document.getElementById('timeCategory').value
+          }));
+        } catch (e) {}
+        startTimerTick();
       } else {
         clearInterval(timerInterval);
         timerInterval = null;
         const elapsedMin = (Date.now() - timerStart) / 60000;
+        try { localStorage.removeItem(TIMER_KEY); } catch (e) {}
         setTimerButton(false);
         document.getElementById('timerDisplay').textContent = "00:00:00";
         // clamp = true: se não couber tudo no dia, guarda só o que cabe
@@ -1977,15 +2015,26 @@
       document.getElementById('mediaInfo').classList.add('hidden');
     }
 
+    // Abre o seletor de foto/câmera (a tela cheia fica de fora enquanto ele abre)
+    function openFilePicker(inputId) {
+      lastPickerAt = Date.now();
+      playNookSound('select');
+      const input = document.getElementById(inputId);
+      if (input) input.click();
+    }
+
     // Recebe o arquivo tanto do botão "Tirar agora" quanto do "Enviar"
     function handleMedia(event) {
-      scheduleHeightFix(); // o seletor de arquivos tira o app da tela cheia
-      goFullscreen();      // tenta voltar já; se o navegador negar (sem toque), o próximo toque volta
+      scheduleHeightFix(); // o seletor de arquivos tira o app da tela cheia (o próximo toque volta)
       const input = event.target;
-      const file = input.files && input.files[0];
-      if (!file) return;
-      if (file.type && file.type.indexOf('video/') === 0) processVideo(file);
-      else processImage(file);
+      try {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (file.type && file.type.indexOf('video/') === 0) processVideo(file);
+        else processImage(file);
+      } catch (err) {
+        showNookToast('Não consegui carregar esse arquivo', 'media/AC_camera.png', 'redo');
+      }
       input.value = ''; // permite escolher o mesmo arquivo de novo depois
     }
 
@@ -2812,6 +2861,7 @@
     populateCategorySelects();
     initSounds();
     initAutomation();
+    restoreTimer();
     updateNetworkUI();
   </script>
 </body>
