@@ -181,13 +181,11 @@
               <input type="date" id="timeDate" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 text-[#3d3d3d]">
             </div>
             <div>
-              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Categoria</label>
-              <select id="timeCategory" onchange="playNookSound('select')" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 text-[#3d3d3d]">
-                <option value="Acadêmico">📚 Acadêmico</option>
-                <option value="Pesquisa">🔬 Pesquisa</option>
-                <option value="Trabalho">🛠️ Trabalho</option>
-                <option value="Bem-estar">🧘‍♀️ Bem-estar</option>
-              </select>
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Categoria</label>
+                <button type="button" onclick="openTagManager()" class="text-[10px] font-bold text-[#5a4b3c] bg-[#fde293] px-2 py-0.5 rounded-full active:scale-95">✏️ Tags</button>
+              </div>
+              <select id="timeCategory" onchange="playNookSound('select')" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 text-[#3d3d3d]"></select>
             </div>
           </div>
 
@@ -377,7 +375,16 @@
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] space-y-2">
           <div>
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Foto ou Mídia</label>
-            <input type="file" id="diaryPhoto" accept="image/*" onchange="compressImage(event)" class="w-full text-[11px] bg-[#f5f0e8] border border-[#e0daca] rounded-xl p-1.5 mt-0.5">
+            <div class="grid grid-cols-2 gap-2 mt-0.5">
+              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryCamera').click()" class="bg-[#8ecae6] text-[#234352] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">📷 Tirar agora</button>
+              <button type="button" onclick="playNookSound('select'); document.getElementById('diaryUpload').click()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">🖼️ Enviar</button>
+            </div>
+            <input type="file" id="diaryCamera" accept="image/*,video/*" capture="environment" onchange="handleMedia(event)" class="hidden">
+            <input type="file" id="diaryUpload" accept="image/*,video/*" onchange="handleMedia(event)" class="hidden">
+            <div id="mediaInfo" class="hidden flex items-center justify-between gap-2 bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1 mt-2">
+              <span id="mediaInfoText" class="text-[11px] font-bold text-[#3d3d3d] truncate"></span>
+              <button type="button" onclick="playNookSound('menuClose'); clearMedia()" class="text-[11px] font-bold text-[#ee7b6d] flex-shrink-0" title="Remover mídia">✕</button>
+            </div>
             <img id="photoPreview" class="w-full h-32 object-cover rounded-2xl mt-2 hidden border border-[#e0daca]" />
           </div>
 
@@ -488,7 +495,7 @@
     <!-- MODAL DE EDIÇÃO DE ITEM DO ACERVO -->
     <div id="editModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
       <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl space-y-2">
-        <h3 class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Registro do VPS</h3>
+        <h3 id="editModalTitle" class="text-sm font-bold text-[#3d3d3d]">✏️ Editar Registro do VPS</h3>
         <input type="hidden" id="editPostId">
 
         <div>
@@ -518,6 +525,7 @@
           <button onclick="submitArchiveEdit()" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl">Salvar</button>
           <button onclick="closeEditModal()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
         </div>
+        <button onclick="deleteFromEditModal()" class="w-full bg-[#ee7b6d] text-white font-bold text-xs py-2 rounded-2xl">Apagar</button>
       </div>
     </div>
 
@@ -534,12 +542,7 @@
 
         <div>
           <label class="text-[10px] font-bold text-[#8c7b6b]">CATEGORIA</label>
-          <select id="timeEditCategory" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5">
-            <option value="Acadêmico">📚 Acadêmico</option>
-            <option value="Pesquisa">🔬 Pesquisa</option>
-            <option value="Trabalho">🛠️ Trabalho</option>
-            <option value="Bem-estar">🧘‍♀️ Bem-estar</option>
-          </select>
+          <select id="timeEditCategory" class="w-full text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2 py-1.5"></select>
         </div>
 
         <div>
@@ -551,6 +554,25 @@
           <button onclick="submitTimeEdit()" class="bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl">Salvar</button>
           <button onclick="closeTimeEdit()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
         </div>
+      </div>
+    </div>
+
+    <!-- MODAL: TAGS DO TIMER -->
+    <div id="tagModal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+      <div class="bg-[#f5f0e8] border-4 border-[#e8d4b0] rounded-[2.2rem] p-4 w-full max-w-[310px] shadow-xl">
+        <h3 class="text-sm font-bold text-[#3d3d3d] mb-2">🏷️ Tags do Timer</h3>
+        <div id="tagList" class="space-y-2 max-h-[220px] overflow-y-auto hide-scrollbar"></div>
+
+        <div class="mt-3">
+          <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Nova tag</label>
+          <div class="flex gap-1.5 mt-0.5">
+            <input type="text" id="newTagEmoji" maxlength="8" placeholder="😀" class="w-11 text-center text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-1 py-1.5">
+            <input type="text" id="newTagName" maxlength="18" placeholder="Nome da tag" onkeydown="if (event.key === 'Enter') addTag()" class="flex-1 min-w-0 text-xs font-bold bg-[#fffdf9] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
+          </div>
+          <button onclick="addTag()" class="w-full mt-2 bg-[#88d4ab] text-[#244232] font-bold text-xs py-2 rounded-2xl active:scale-95 transition-transform">+ Adicionar tag</button>
+        </div>
+
+        <button onclick="closeTagManager()" class="w-full mt-2 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl">Fechar</button>
       </div>
     </div>
 
@@ -619,30 +641,120 @@
       nookTritone: 'media/sound/Nook Tritone.mp3'
     };
 
-    const audioCache = {};
+    // Volume extra: 1.0 = original. O <audio> do navegador não passa de 100%,
+    // então os sons passam por Web Audio com ganho + limitador (evita estourar).
+    const SOUND_GAIN = 1.7;
+    // Tempo máximo (ms) de certos sons — corta qualquer som que ficaria "preso" tocando
+    const SOUND_MAX_MS = { scroll: 350 };
+
     let soundMuted = localStorage.getItem('nook_muted') === 'true';
+    let audioCtx = null;
+    let masterGain = null;
+    const bufferCache = {};
+    const activeSources = {};
+    const fallbackAudio = {};
+    let lastScrollSound = 0;
 
     function initSounds() {
-      Object.entries(SOUND_PATHS).forEach(([key, path]) => {
-        const a = new Audio(encodeURI(path));
-        a.preload = 'auto';
-        audioCache[key] = a;
-      });
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          audioCtx = new AC();
+          masterGain = audioCtx.createGain();
+          masterGain.gain.value = SOUND_GAIN;
+          const limiter = audioCtx.createDynamicsCompressor();
+          limiter.threshold.value = -8;
+          limiter.knee.value = 6;
+          limiter.ratio.value = 12;
+          limiter.attack.value = 0.003;
+          limiter.release.value = 0.15;
+          masterGain.connect(limiter);
+          limiter.connect(audioCtx.destination);
+
+          Object.entries(SOUND_PATHS).forEach(([key, path]) => {
+            fetch(encodeURI(path))
+              .then(r => r.arrayBuffer())
+              .then(buf => new Promise((res, rej) => audioCtx.decodeAudioData(buf, res, rej)))
+              .then(decoded => { bufferCache[key] = decoded; })
+              .catch(() => {});
+          });
+
+          // O navegador só libera o áudio depois de um toque na tela
+          const unlock = () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); };
+          ['pointerdown', 'touchend', 'click'].forEach(ev => document.addEventListener(ev, unlock));
+        }
+      } catch (e) {
+        audioCtx = null;
+      }
       updateSoundUI();
     }
 
-    function playNookSound(name) {
-      if (soundMuted || !audioCache[name]) return;
+    function stopSound(name) {
+      const src = activeSources[name];
+      if (src) {
+        try { src.stop(); } catch (e) {}
+        delete activeSources[name];
+      }
+      const fb = fallbackAudio[name];
+      if (fb) { try { fb.pause(); } catch (e) {} }
+    }
+
+    function stopAllSounds() {
+      Object.keys(activeSources).forEach(stopSound);
+      Object.keys(fallbackAudio).forEach(stopSound);
+    }
+
+    function playFallback(name) {
+      const path = SOUND_PATHS[name];
+      if (!path) return;
       try {
-        const snd = audioCache[name];
-        snd.currentTime = 0;
-        snd.play().catch(() => {});
+        let a = fallbackAudio[name];
+        if (!a) {
+          a = new Audio(encodeURI(path));
+          a.loop = false;
+          fallbackAudio[name] = a;
+        }
+        a.pause();
+        a.currentTime = 0;
+        a.play().catch(() => {});
+        if (SOUND_MAX_MS[name]) setTimeout(() => { try { a.pause(); } catch (e) {} }, SOUND_MAX_MS[name]);
       } catch (e) {}
+    }
+
+    function playNookSound(name) {
+      if (soundMuted) return;
+
+      // Som de rolagem: no máximo 1 a cada 120ms (evita empilhar ao tocar rápido)
+      if (name === 'scroll') {
+        const now = Date.now();
+        if (now - lastScrollSound < 120) return;
+        lastScrollSound = now;
+      }
+
+      if (audioCtx && bufferCache[name]) {
+        try {
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          stopSound(name);
+          const src = audioCtx.createBufferSource();
+          src.buffer = bufferCache[name];
+          src.loop = false;
+          src.connect(masterGain);
+          src.onended = () => { if (activeSources[name] === src) delete activeSources[name]; };
+          activeSources[name] = src;
+          src.start(0);
+          if (SOUND_MAX_MS[name]) {
+            setTimeout(() => { try { src.stop(); } catch (e) {} }, SOUND_MAX_MS[name]);
+          }
+          return;
+        } catch (e) {}
+      }
+      playFallback(name);
     }
 
     function toggleMute() {
       soundMuted = !soundMuted;
       localStorage.setItem('nook_muted', soundMuted);
+      if (soundMuted) stopAllSounds();
       updateSoundUI();
       showNookToast(soundMuted ? 'Som silenciado' : 'Som ativado!', 'media/AC_froggychair.png', soundMuted ? null : 'nookTritone');
     }
@@ -794,8 +906,7 @@
 
     function quickWellbeingStamp() {
       document.getElementById('timeDate').value = todayISO();
-      document.getElementById('timeCategory').value = 'Bem-estar';
-      storeTimeEntry(15);
+      storeTimeEntry(15, 'Bem-estar');
     }
 
     // ==========================================
@@ -854,12 +965,12 @@
       }
     }
 
-    function storeTimeEntry(minutes) {
+    function storeTimeEntry(minutes, categoryOverride) {
       const entry = {
         action: "create_time",
         id: "time_" + Date.now(),
         date: document.getElementById('timeDate').value,
-        category: document.getElementById('timeCategory').value,
+        category: categoryOverride || document.getElementById('timeCategory').value,
         minutes: minutes,
         mm_scale: Number((minutes / 10).toFixed(2)),
         synced: false
@@ -885,15 +996,123 @@
       camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
       trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
       x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-      chevron: '<path d="m9 18 6-6-6-6"/>'
+      chevron: '<path d="m9 18 6-6-6-6"/>',
+      tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>'
     };
 
-    const CAT_STYLE = {
-      'Acadêmico': { bg: 'rgb(156,180,216)', color: 'rgb(44,74,107)', icon: 'book' },
-      'Pesquisa':  { bg: 'rgb(126,200,227)', color: 'rgb(26,95,122)', icon: 'flask' },
-      'Trabalho':  { bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'briefcase' },
-      'Bem-estar': { bg: 'rgb(168,213,186)', color: 'rgb(45,95,63)', icon: 'leaf' }
-    };
+    // ---- Tags do Timer (salvas no aparelho; dá pra criar e apagar) ----
+    const TAG_PALETTE = [
+      { bg: 'rgb(156,180,216)', color: 'rgb(44,74,107)' },
+      { bg: 'rgb(126,200,227)', color: 'rgb(26,95,122)' },
+      { bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)' },
+      { bg: 'rgb(168,213,186)', color: 'rgb(45,95,63)' },
+      { bg: 'rgb(244,182,170)', color: 'rgb(122,52,40)' },
+      { bg: 'rgb(205,180,219)', color: 'rgb(63,46,76)' }
+    ];
+    const DEFAULT_TAGS = [
+      { name: 'Acadêmico', emoji: '📚', c: 0, icon: 'book' },
+      { name: 'Pesquisa', emoji: '🔬', c: 1, icon: 'flask' },
+      { name: 'Trabalho', emoji: '🛠️', c: 2, icon: 'briefcase' },
+      { name: 'Bem-estar', emoji: '🧘‍♀️', c: 3, icon: 'leaf' }
+    ];
+
+    function getTags() {
+      try {
+        const raw = JSON.parse(localStorage.getItem('nook_tags'));
+        if (Array.isArray(raw) && raw.length) return raw;
+      } catch (e) {}
+      return DEFAULT_TAGS.map(t => ({ ...t }));
+    }
+
+    function saveTags(tags) {
+      try { localStorage.setItem('nook_tags', JSON.stringify(tags)); } catch (e) {}
+    }
+
+    // Cor/ícone de uma categoria (tags apagadas continuam aparecendo no histórico, em cinza)
+    function catStyle(name) {
+      const t = getTags().find(x => x.name === name);
+      if (!t) return { bg: 'rgb(224,218,202)', color: 'rgb(140,123,107)', icon: 'tag' };
+      const p = TAG_PALETTE[t.c % TAG_PALETTE.length];
+      return { bg: p.bg, color: p.color, icon: t.icon || 'tag' };
+    }
+
+    function tagOptionsHtml(tags) {
+      return tags.map(t => `<option value="${esc(t.name)}">${esc((t.emoji ? t.emoji + ' ' : '') + t.name)}</option>`).join('');
+    }
+
+    function populateCategorySelects(selectName) {
+      const tags = getTags();
+      const sel = document.getElementById('timeCategory');
+      const prev = selectName || sel.value;
+      sel.innerHTML = tagOptionsHtml(tags);
+      sel.value = tags.some(t => t.name === prev) ? prev : tags[0].name;
+      document.getElementById('timeEditCategory').innerHTML = tagOptionsHtml(tags);
+    }
+
+    function renderTagManager() {
+      const tags = getTags();
+      document.getElementById('tagList').innerHTML = tags.map((t, i) => {
+        const p = TAG_PALETTE[t.c % TAG_PALETTE.length];
+        const trash = `<button onclick="deleteTag(${i})" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar tag">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
+        return navRow({
+          bg: p.bg, color: p.color, icon: t.icon || 'tag',
+          title: (t.emoji ? t.emoji + ' ' : '') + t.name,
+          actionHtml: trash, chevron: false
+        });
+      }).join('');
+    }
+
+    function openTagManager() {
+      playNookSound('menuOpen');
+      renderTagManager();
+      document.getElementById('tagModal').classList.remove('hidden');
+    }
+
+    function closeTagManager() {
+      playNookSound('menuClose');
+      document.getElementById('tagModal').classList.add('hidden');
+    }
+
+    function addTag() {
+      const nameEl = document.getElementById('newTagName');
+      const emojiEl = document.getElementById('newTagEmoji');
+      const name = nameEl.value.trim().slice(0, 18);
+      if (!name) return showNookToast('Dê um nome para a tag!', 'media/AC_clock.png', 'redo');
+
+      const tags = getTags();
+      if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+        return showNookToast('Essa tag já existe!', 'media/AC_clock.png', 'redo');
+      }
+      const nextColor = (Math.max(-1, ...tags.map(t => t.c || 0)) + 1) % TAG_PALETTE.length;
+      tags.push({ name, emoji: emojiEl.value.trim(), c: nextColor, icon: 'tag' });
+      saveTags(tags);
+
+      nameEl.value = '';
+      emojiEl.value = '';
+      populateCategorySelects(name);
+      renderTagManager();
+      showNookToast(`Tag "${name}" criada!`, 'media/AC_clock.png', 'stamp');
+    }
+
+    async function deleteTag(index) {
+      const tags = getTags();
+      if (tags.length <= 1) return showNookToast('Mantenha pelo menos uma tag!', 'media/AC_clock.png', 'redo');
+      const tag = tags[index];
+      if (!tag) return;
+
+      const ok = await nookConfirm('Registros antigos com essa tag continuam no histórico.', {
+        title: `Apagar "${tag.name}"?`, okText: 'Apagar', cancelText: 'Manter', danger: true
+      });
+      if (!ok) return;
+
+      const fresh = getTags();
+      const idx = fresh.findIndex(t => t.name === tag.name);
+      if (idx >= 0) fresh.splice(idx, 1);
+      saveTags(fresh);
+      populateCategorySelects();
+      renderTagManager();
+      showNookToast('Tag apagada!', 'media/AC_clock.png', 'postDelete');
+    }
 
     function esc(str) {
       return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1088,7 +1307,7 @@
 
       const sorted = [...dayLogs].sort((a, b) => String(a.id).localeCompare(String(b.id)));
       list.innerHTML = sorted.map(l => {
-        const st = CAT_STYLE[l.category] || { bg: 'rgb(224,218,202)', color: 'rgb(140,123,107)', icon: 'book' };
+        const st = catStyle(l.category);
         const ts = parseInt(String(l.id).split('_')[1]);
         const hour = ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
         const trash = `<button onclick="event.stopPropagation(); deleteTimeEntry('${l.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`;
@@ -1116,7 +1335,14 @@
         playNookSound('menuOpen');
         document.getElementById('timeEditId').value = it.id;
         document.getElementById('timeEditDate').value = it.date;
-        document.getElementById('timeEditCategory').value = it.category;
+        const editSel = document.getElementById('timeEditCategory');
+        if (![...editSel.options].some(o => o.value === it.category)) {
+          const o = document.createElement('option');
+          o.value = it.category;
+          o.textContent = it.category;
+          editSel.appendChild(o);
+        }
+        editSel.value = it.category;
         document.getElementById('timeEditMinutes').value = it.minutes;
         document.getElementById('timeEditModal').classList.remove('hidden');
       };
@@ -1190,6 +1416,9 @@
     // ==========================================
     let currentFullBase64 = null;
     let currentThumbBase64 = null;
+    let currentVideoBase64 = null;
+    let currentMediaType = 'image';
+    const MAX_VIDEO_MB = 10; // o n8n aceita ~16MB por requisição (base64 incha ~33%)
 
     function toggleDelaySelect() {
       playNookSound('scroll');
@@ -1197,9 +1426,31 @@
       document.getElementById('delayBox').style.visibility = (mode === 'agendado') ? 'visible' : 'hidden';
     }
 
-    function compressImage(event) {
-      const file = event.target.files[0];
+    function showMediaInfo(text) {
+      document.getElementById('mediaInfoText').textContent = text;
+      document.getElementById('mediaInfo').classList.remove('hidden');
+    }
+
+    function clearMedia() {
+      currentFullBase64 = null;
+      currentThumbBase64 = null;
+      currentVideoBase64 = null;
+      currentMediaType = 'image';
+      document.getElementById('photoPreview').classList.add('hidden');
+      document.getElementById('mediaInfo').classList.add('hidden');
+    }
+
+    // Recebe o arquivo tanto do botão "Tirar agora" quanto do "Enviar"
+    function handleMedia(event) {
+      const input = event.target;
+      const file = input.files && input.files[0];
       if (!file) return;
+      if (file.type && file.type.indexOf('video/') === 0) processVideo(file);
+      else processImage(file);
+      input.value = ''; // permite escolher o mesmo arquivo de novo depois
+    }
+
+    function processImage(file) {
       playNookSound('select');
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -1211,6 +1462,8 @@
           canvasFull.height = img.height * scaleFull;
           canvasFull.getContext('2d').drawImage(img, 0, 0, canvasFull.width, canvasFull.height);
           currentFullBase64 = canvasFull.toDataURL('image/jpeg', 0.72);
+          currentVideoBase64 = null;
+          currentMediaType = 'image';
 
           const canvasThumb = document.createElement('canvas');
           const scaleThumb = img.width > 240 ? 240 / img.width : 1;
@@ -1222,11 +1475,75 @@
           const preview = document.getElementById('photoPreview');
           preview.src = currentThumbBase64;
           preview.classList.remove('hidden');
+          showMediaInfo('📷 ' + (file.name || 'foto'));
           showNookToast('Foto pronta!', 'media/AC_camera.png', 'enter');
         };
+        img.onerror = () => showNookToast('Não consegui ler essa imagem', 'media/AC_camera.png', 'redo');
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    function processVideo(file) {
+      const mb = file.size / 1048576;
+      if (mb > MAX_VIDEO_MB) {
+        return showNookToast(`Vídeo grande demais (${mb.toFixed(1)}MB, máx ${MAX_VIDEO_MB}MB)`, 'media/AC_camera.png', 'redo');
+      }
+      showNookToast('Lendo vídeo...', 'media/AC_camera.png', 'wait');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentVideoBase64 = e.target.result;
+        currentFullBase64 = null;
+        currentMediaType = 'video';
+        makeVideoThumb(file, (thumb) => {
+          currentThumbBase64 = thumb;
+          const preview = document.getElementById('photoPreview');
+          if (thumb) {
+            preview.src = thumb;
+            preview.classList.remove('hidden');
+          } else {
+            preview.classList.add('hidden');
+          }
+          showMediaInfo(`🎬 vídeo • ${mb.toFixed(1)}MB`);
+          showNookToast('Vídeo pronto!', 'media/AC_camera.png', 'enter');
+        });
+      };
+      reader.onerror = () => showNookToast('Erro ao ler o vídeo', 'media/AC_camera.png', 'redo');
+      reader.readAsDataURL(file);
+    }
+
+    // Miniatura (1º quadro) do vídeo
+    function makeVideoThumb(file, cb) {
+      const url = URL.createObjectURL(file);
+      let done = false;
+      const finish = (value) => {
+        if (done) return;
+        done = true;
+        try { URL.revokeObjectURL(url); } catch (e) {}
+        cb(value);
+      };
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.onloadeddata = () => {
+        try { video.currentTime = Math.min(0.1, (video.duration || 0.2) / 2); } catch (e) { finish(null); }
+      };
+      video.onseeked = () => {
+        try {
+          const w = video.videoWidth || 240;
+          const h = video.videoHeight || 240;
+          const scale = w > 240 ? 240 / w : 1;
+          const c = document.createElement('canvas');
+          c.width = Math.round(w * scale);
+          c.height = Math.round(h * scale);
+          c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+          finish(c.toDataURL('image/jpeg', 0.6));
+        } catch (e) { finish(null); }
+      };
+      video.onerror = () => finish(null);
+      setTimeout(() => finish(null), 4000);
+      video.src = url;
     }
 
     function saveDiaryEntry() {
@@ -1235,7 +1552,7 @@
       const statusMode = document.getElementById('diarySaveMode').value;
       const delayDays = parseInt(document.getElementById('diaryDelay').value);
 
-      if (!currentFullBase64 && !caption) {
+      if (!currentFullBase64 && !currentVideoBase64 && !caption) {
         return showNookToast('Adicione foto ou legenda!', 'media/AC_camera.png', 'redo');
       }
 
@@ -1252,7 +1569,9 @@
         location: document.getElementById('diaryLocation').value.trim(),
         caption: caption,
         thumb_base64: currentThumbBase64,
+        media_type: currentMediaType,
         image_base64: currentFullBase64,
+        video_base64: currentVideoBase64,
         synced: false
       };
 
@@ -1266,9 +1585,7 @@
         );
         document.getElementById('diaryCaption').value = '';
         document.getElementById('diaryLocation').value = '';
-        document.getElementById('photoPreview').classList.add('hidden');
-        currentFullBase64 = null;
-        currentThumbBase64 = null;
+        clearMedia();
         updateQueueCounter();
         if (navigator.onLine) syncQueueWithVPS(false);
       };
@@ -1369,6 +1686,8 @@
       if (!item) return;
 
       playNookSound('menuOpen');
+      editSource = 'vps';
+      document.getElementById('editModalTitle').textContent = '✏️ Editar Registro do VPS';
       document.getElementById('editPostId').value = item.id;
       document.getElementById('editStatus').value = item.status === 'cancelado' ? 'rascunho' : item.status;
       document.getElementById('editScheduledDate').value = item.scheduled_post_date;
@@ -1382,7 +1701,94 @@
       document.getElementById('editModal').classList.add('hidden');
     }
 
+    // ---- Fila local (itens ainda no aparelho, que não subiram pro VPS) ----
+    let editSource = 'vps'; // 'vps' = registro do acervo | 'local' = item da fila do aparelho
+
+    function openLocalEdit(id) {
+      const req = db.transaction("diaryQueue", "readonly").objectStore("diaryQueue").get(id);
+      req.onsuccess = () => {
+        const it = req.result;
+        if (!it) return;
+        playNookSound('menuOpen');
+        editSource = 'local';
+        document.getElementById('editModalTitle').textContent = '✏️ Editar item da fila';
+        document.getElementById('editPostId').value = it.id;
+        document.getElementById('editStatus').value = it.status === 'rascunho' ? 'rascunho' : 'agendado';
+        document.getElementById('editScheduledDate').value = it.scheduled_post_date || '';
+        document.getElementById('editLocation').value = it.location || '';
+        document.getElementById('editCaption').value = it.caption || '';
+        document.getElementById('editModal').classList.remove('hidden');
+      };
+    }
+
+    function submitLocalEdit() {
+      const id = document.getElementById('editPostId').value;
+      const tx = db.transaction("diaryQueue", "readwrite");
+      const store = tx.objectStore("diaryQueue");
+      const g = store.get(id);
+      g.onsuccess = () => {
+        const it = g.result;
+        if (!it) return;
+        it.status = document.getElementById('editStatus').value;
+        it.scheduled_post_date = document.getElementById('editScheduledDate').value;
+        it.location = document.getElementById('editLocation').value.trim();
+        it.caption = document.getElementById('editCaption').value.trim();
+        store.put(it);
+      };
+      tx.oncomplete = () => {
+        document.getElementById('editModal').classList.add('hidden');
+        showNookToast('Item da fila atualizado!', 'media/AC_post.png', 'stamp');
+        renderPendingQueue();
+        updateQueueCounter();
+      };
+    }
+
+    async function deleteLocalPost(id) {
+      const ok = await nookConfirm('Esse item será removido da fila e não vai subir pro VPS.', { title: 'Apagar da fila?', okText: 'Apagar', cancelText: 'Manter', danger: true });
+      if (!ok) return false;
+      const tx = db.transaction("diaryQueue", "readwrite");
+      tx.objectStore("diaryQueue").delete(id);
+      tx.oncomplete = () => {
+        showNookToast('Item apagado da fila!', 'media/AC_post.png', 'postDelete');
+        renderPendingQueue();
+        updateQueueCounter();
+      };
+      return true;
+    }
+
+    // Apaga de vez um registro que ainda não foi postado (n8n precisa tratar action "delete_post")
+    async function deleteVpsPost(id) {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine) {
+        showNookToast('Conecte o Wi-Fi para apagar!', 'media/AC_settings.png', 'redo');
+        return false;
+      }
+      const ok = await nookConfirm('Esse registro será apagado do VPS de vez.', { title: 'Apagar registro?', okText: 'Apagar', cancelText: 'Manter', danger: true });
+      if (!ok) return false;
+      try {
+        const resp = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: "delete_post", id: id })
+        });
+        if (resp.ok) {
+          showNookToast('Registro apagado!', 'media/AC_post.png', 'postDelete');
+          fetchVPSArchive();
+          return true;
+        }
+      } catch (err) {}
+      showNookToast('Erro ao apagar.', 'media/AC_settings.png', 'redo');
+      return false;
+    }
+
+    async function deleteFromEditModal() {
+      const id = document.getElementById('editPostId').value;
+      const done = editSource === 'local' ? await deleteLocalPost(id) : await deleteVpsPost(id);
+      if (done) document.getElementById('editModal').classList.add('hidden');
+    }
+
     async function submitArchiveEdit() {
+      if (editSource === 'local') return submitLocalEdit();
       const webhook = localStorage.getItem('nook_webhook');
       if (!webhook || !navigator.onLine) return showNookToast('Sem conexão!', 'media/AC_settings.png', 'redo');
 
@@ -1481,11 +1887,12 @@
           return;
         }
         container.innerHTML = pending.map(p => navRow({
+          onclick: `openLocalEdit('${p.id}')`,
           bg: 'rgb(244,212,124)', color: 'rgb(139,105,20)', icon: 'camera',
           thumb: p.thumb_base64,
-          title: p.caption || 'Sem legenda',
+          title: (p.media_type === 'video' ? '🎬 ' : '') + (p.caption || 'Sem legenda'),
           subtitle: `${p.status} • ${fmtBR(p.date_occurred)} → ${fmtBR(p.scheduled_post_date)}`,
-          chevron: false
+          actionHtml: `<button onclick="event.stopPropagation(); deleteLocalPost('${p.id}')" class="flex-shrink-0 p-1 rounded-full active:scale-90" title="Apagar">${svgIcon('trash', 'w-4 h-4', '#ee7b6d')}</button>`
         })).join('');
       };
     }
@@ -1568,8 +1975,9 @@
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(reg => reg.update());
+      navigator.serviceWorker.register('sw.js').then(reg => { if (reg && reg.update) reg.update(); }).catch(() => {});
     }
+    populateCategorySelects();
     initSounds();
     updateNetworkUI();
   </script>
