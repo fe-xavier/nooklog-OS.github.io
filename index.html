@@ -3,1523 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#f5f0e1">
+  <meta name="theme-color" content="#f5f0e8">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="media/AC_froggychair.png">
-  <title>NookPhone OS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <title>NookPhone</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --nook-cream: #f5f0e1;
-      --nook-cream-dark: #e6dec8;
-      --nook-dot: #ebe4d1;
-      --nook-brown: #5a4b3c;
-      --nook-brown-light: #8c7b6b;
-      --nook-mint: #7fd1ae;
-      --nook-teal: #4ea89c;
-      --nook-yellow: #f9d86a;
-      --nook-orange: #f4a261;
-      --nook-coral: #ee7b6d;
-      --nook-sky: #7ec4cf;
-      --nook-lavender: #c3aed6;
-      --nook-white: #fffdf9;
-    }
-
     * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Nunito', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    body {
-      background-color: var(--nook-cream);
-      background-image: radial-gradient(var(--nook-dot) 20%, transparent 20%),
-                        radial-gradient(var(--nook-dot) 20%, transparent 20%);
-      background-position: 0 0, 14px 14px;
-      background-size: 28px 28px;
-      color: var(--nook-brown);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    @keyframes fadeInUpSlow {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up-slow {
+      animation: fadeInUpSlow 0.32s ease-out forwards;
     }
 
-    /* Barra de Status Superior do NookPhone */
-    header {
-      padding: 12px 20px 8px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 800;
-      font-size: 0.88rem;
-      color: var(--nook-brown-light);
-      z-index: 20;
-    }
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeInUpSlow 0.22s ease-out; }
 
-    .signal-bars {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 3px;
-      height: 14px;
-      margin-right: 6px;
-    }
-    .signal-bars span {
-      width: 4px;
-      background: #ccc2b0;
-      border-radius: 2px;
-    }
-    .signal-bars.online span { background: var(--nook-teal); }
-    .signal-bars span:nth-child(1) { height: 5px; }
-    .signal-bars span:nth-child(2) { height: 8px; }
-    .signal-bars span:nth-child(3) { height: 11px; }
-    .signal-bars span:nth-child(4) { height: 14px; }
-
-    .status-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .sound-toggle {
-      background: var(--nook-white);
-      border: 2px solid var(--nook-cream-dark);
-      border-radius: 20px;
-      padding: 2px 8px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: var(--nook-brown);
-      cursor: pointer;
-    }
-
-    /* Balão de Notificação Estilo ACNH */
-    #nookToast {
-      position: fixed;
-      top: 52px;
-      left: 50%;
-      transform: translateX(-50%) scale(0.8);
-      background: var(--nook-brown);
-      color: var(--nook-white);
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      box-shadow: 0 8px 20px rgba(90, 75, 60, 0.25);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 200;
-      white-space: nowrap;
-      border: 3px solid var(--nook-yellow);
-    }
-    #nookToast.show {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-    #nookToast img {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-    }
-
-    /* Área Principal */
-    main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px 18px 90px 18px;
-    }
-
-    .screen {
-      display: none;
-      animation: nookOpen 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .screen.active { display: block; }
-
-    @keyframes nookOpen {
-      0% { transform: scale(0.88) translateY(12px); opacity: 0; }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
-    }
-
-    /* Tela Inicial: Banner e Grid Squircle do NookPhone */
-    .nook-title-pill {
-      background: var(--nook-white);
-      border: 3px solid var(--nook-cream-dark);
-      border-radius: 30px;
-      padding: 8px 24px;
-      margin: 8px auto 22px auto;
-      width: fit-content;
-      min-width: 190px;
-      text-align: center;
-      font-size: 1.15rem;
-      font-weight: 900;
-      color: var(--nook-brown);
-      box-shadow: 0 5px 0 rgba(90,75,60,0.06);
-      position: relative;
-    }
-    .nook-title-pill::after {
-      content: '';
-      position: absolute;
-      bottom: -9px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 9px 9px 0;
-      border-style: solid;
-      border-color: var(--nook-white) transparent;
-    }
-
-    .app-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px 14px;
-      max-width: 330px;
-      margin: 0 auto;
-      padding: 6px;
-    }
-
-    .app-btn {
-      background: none;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .app-btn:active {
-      transform: scale(0.88);
-    }
-
-    .squircle-icon {
-      width: 82px;
-      height: 82px;
-      border-radius: 30%;
-      overflow: hidden;
-      box-shadow: 0 6px 0 rgba(90, 75, 60, 0.12);
-      border: 3px solid rgba(255, 255, 255, 0.85);
-      background: var(--nook-white);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .squircle-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .app-btn-label {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      font-weight: 900;
-      color: var(--nook-brown);
-      background: rgba(255, 253, 249, 0.85);
-      padding: 2px 9px;
-      border-radius: 12px;
-    }
-
-    /* Widget de Resumo Rápido na Home */
-    .home-widget {
-      max-width: 330px;
-      margin: 24px auto 0 auto;
-      background: var(--nook-white);
-      border-radius: 26px;
-      padding: 14px 18px;
-      border: 3px solid var(--nook-cream-dark);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      box-shadow: 0 6px 0 rgba(90, 75, 60, 0.06);
-      cursor: pointer;
-    }
-    .home-widget img {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-    }
-
-    /* Cabeçalho Interno dos Apps */
-    .app-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--nook-white);
-      padding: 10px 16px;
-      border-radius: 24px;
-      margin-bottom: 14px;
-      border: 3px solid var(--nook-cream-dark);
-      box-shadow: 0 4px 0 rgba(90,75,60,0.05);
-    }
-    .app-header img {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-    }
-    .app-header h2 {
-      font-size: 1.15rem;
-      font-weight: 900;
-      margin: 0;
-    }
-
-    /* Cartões Internos */
-    .card {
-      background: var(--nook-white);
-      border-radius: 26px;
-      padding: 16px;
-      margin-bottom: 14px;
-      border: 3px solid var(--nook-cream-dark);
-      box-shadow: 0 6px 0 rgba(90, 75, 60, 0.05);
-    }
-
-    label {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--nook-brown-light);
-      margin: 10px 0 4px 0;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 18px;
-      border: 3px solid var(--nook-cream-dark);
-      background: var(--nook-cream);
-      color: var(--nook-brown);
-      font-size: 0.95rem;
-      font-weight: 800;
-      outline: none;
-      user-select: text;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--nook-mint);
-      background: #fff;
-    }
-
-    /* Seletor Visual de Categorias com Ícones AC */
-    .cat-selector {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .cat-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 18px;
-      background: var(--nook-cream);
-      border: 3px solid transparent;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 0.85rem;
-      color: var(--nook-brown);
-    }
-    .cat-pill.selected {
-      border-color: var(--nook-teal);
-      background: #e6f7f2;
-    }
-    .cat-pill img {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-    }
-
-    /* Botões NookPhone */
-    .btn {
-      width: 100%;
-      padding: 13px 16px;
-      border: none;
-      border-radius: 22px;
-      font-size: 0.98rem;
-      font-weight: 900;
-      color: var(--nook-brown);
-      cursor: pointer;
-      margin-top: 12px;
-      box-shadow: 0 5px 0 rgba(90, 75, 60, 0.14);
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      transition: transform 0.12s;
-    }
-    .btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 1px 0 rgba(90, 75, 60, 0.14);
-    }
-    .btn-sm {
-      padding: 7px 13px;
-      font-size: 0.8rem;
-      border-radius: 15px;
-      margin-top: 0;
-      width: auto;
-    }
-
-    .bg-mint { background-color: var(--nook-mint); }
-    .bg-yellow { background-color: var(--nook-yellow); }
-    .bg-orange { background-color: var(--nook-orange); color: #fff; }
-    .bg-coral { background-color: var(--nook-coral); color: #fff; }
-    .bg-sky { background-color: var(--nook-sky); }
-    .bg-lavender { background-color: var(--nook-lavender); }
-
-    /* Display do Cronômetro */
-    .timer-box {
-      text-align: center;
-      padding: 14px 10px 6px 10px;
-      background: var(--nook-cream);
-      border-radius: 22px;
-      margin-top: 12px;
-      border: 2px dashed var(--nook-cream-dark);
-    }
-    .timer-digits {
-      font-size: 2.5rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: var(--nook-brown);
-    }
-
-    /* Barra de Progresso 1440m */
-    .progress-bar {
-      width: 100%;
-      height: 20px;
-      background: var(--nook-cream);
-      border-radius: 14px;
-      overflow: hidden;
-      margin: 8px 0;
-      border: 2px solid var(--nook-cream-dark);
-    }
-    .progress-fill {
-      height: 100%;
-      background: repeating-linear-gradient(
-        45deg,
-        var(--nook-mint),
-        var(--nook-mint) 10px,
-        #6bc49e 10px,
-        #6bc49e 20px
-      );
-      width: 0%;
-      transition: width 0.35s ease;
-    }
-
-    /* Carimbos Nook Miles (Tags e Categorias) */
-    .tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 8px;
-    }
-    .nook-stamp {
-      background: var(--nook-cream);
-      border: 2px solid var(--nook-cream-dark);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 900;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* Filtros do Acervo */
-    .filter-bar {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
-    }
-    .filter-btn {
-      border: 2px solid var(--nook-cream-dark);
-      background: var(--nook-white);
-      color: var(--nook-brown);
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 900;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .filter-btn.active {
-      background: var(--nook-teal);
-      border-color: var(--nook-teal);
-      color: #fff;
-    }
-
-    /* Lista do Acervo VPS */
-    .archive-item {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      border-bottom: 2px dashed var(--nook-cream-dark);
-      padding-bottom: 14px;
-      margin-bottom: 14px;
-    }
-    .archive-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .archive-thumb {
-      width: 74px;
-      height: 74px;
-      border-radius: 18px;
-      object-fit: cover;
-      background: var(--nook-cream);
-      border: 2px solid var(--nook-cream-dark);
-      flex-shrink: 0;
-    }
-    .archive-info { flex: 1; min-width: 0; }
-
-    .status-badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-    .st-agendado { background: var(--nook-yellow); color: #6e5211; }
-    .st-rascunho { background: var(--nook-lavender); color: #432c52; }
-    .st-postado { background: var(--nook-mint); color: #194d33; }
-    .st-cancelado { background: #e0dad0; color: #7a7267; text-decoration: line-through; }
-
-    .archive-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    /* Modal de Edição */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(90, 75, 60, 0.55);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 18px;
-      z-index: 150;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-card {
-      background: var(--nook-cream);
-      border: 4px solid var(--nook-white);
-      width: 100%;
-      max-width: 370px;
-      border-radius: 30px;
-      padding: 20px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-    }
-
-    /* Botão Home Inferior do NookPhone */
-    .nav-bar {
-      position: fixed;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 90;
-    }
-    .home-btn {
-      background: var(--nook-white);
-      border: 3px solid var(--nook-cream-dark);
-      padding: 8px 26px;
-      border-radius: 30px;
-      font-size: 0.92rem;
-      font-weight: 900;
-      color: var(--nook-brown);
-      cursor: pointer;
-      box-shadow: 0 5px 15px rgba(90, 75, 60, 0.12);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .home-btn:active { transform: scale(0.93); }
-    .home-btn img { width: 20px; height: 20px; border-radius: 5px; }
+    input, select, textarea { user-select: text; }
   </style>
 </head>
-<body>
+<body class="bg-[#e4decb] min-h-screen flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
-  <!-- BARRA DE STATUS SUPERIOR -->
-  <header>
-    <div style="display:flex; align-items:center;">
-      <div id="signalBars" class="signal-bars">
-        <span></span><span></span><span></span><span></span>
+  <!-- CHASSI DO NOOKPHONE (Exatamente como no exemplo enviado) -->
+  <div class="relative bg-[#f5f0e8] w-full h-screen sm:h-[620px] sm:w-[356px] sm:rounded-[4rem] shadow-2xl border-0 sm:border-8 border-[#e8d4b0] flex flex-col transition-all duration-500 ease-out translate-y-0 overflow-hidden">
+
+    <!-- BARRA DE STATUS SUPERIOR -->
+    <div class="relative flex items-center justify-center pt-5 px-4 pb-2 border-b border-[#e0daca]">
+      <!-- Status Celular (Esquerda) -->
+      <div class="absolute left-7 flex items-center gap-1" id="cellularStatus" title="Status da Rede">
+        <svg width="46" height="12" viewBox="0 0 46 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect id="bar1" x="1" y="7" width="3.5" height="4" rx="1" fill="#e0daca"/>
+          <rect id="bar2" x="6" y="5" width="3.5" height="6" rx="1" fill="#e0daca"/>
+          <rect id="bar3" x="11" y="3" width="3.5" height="8" rx="1" fill="#e0daca"/>
+          <rect id="bar4" x="16" y="1" width="3.5" height="10" rx="1" fill="#e0daca"/>
+          <circle id="netDot" cx="27" cy="6" r="3.5" fill="#e0daca"/>
+        </svg>
       </div>
-      <span id="netStatusText">Offline</span>
+
+      <!-- Relógio e Data Central -->
+      <div class="text-center cursor-pointer" onclick="goHome()">
+        <div class="flex items-center justify-center gap-1 leading-none">
+          <span id="clockTime" class="text-lg font-bold text-[#c7beaa]">9:17</span>
+          <span id="clockAmPm" class="text-xs font-bold text-[#c7beaa]">PM</span>
+        </div>
+        <div id="clockDate" class="text-[11px] font-bold text-[#c7beaa] tracking-wide mt-0.5">SATURDAY, NOV. 7</div>
+      </div>
+
+      <!-- Status Localização / Som (Direita) -->
+      <button class="absolute right-7 flex items-center gap-1" onclick="toggleMute()" title="Alternar Som">
+        <svg id="locSvg" width="25" height="15" viewBox="0 0 25 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 1C9.46 1 7 3.46 7 6.5C7 10.62 12.5 14 12.5 14C12.5 14 18 10.62 18 6.5C18 3.46 15.54 1 12.5 1ZM12.5 8.5C11.4 8.5 10.5 7.6 10.5 6.5C10.5 5.4 11.4 4.5 12.5 4.5C13.6 4.5 14.5 5.4 14.5 6.5C14.5 7.6 13.6 8.5 12.5 8.5Z" fill="#c7beaa"/>
+        </svg>
+      </button>
     </div>
-    <div id="clockDisplay" style="font-size:1rem; color:var(--nook-brown);">12:00</div>
-    <div class="status-right">
-      <span id="queueCounter">Fila: 0</span>
-      <button class="sound-toggle" id="btnSoundToggle" onclick="toggleMute()">🔊 Som</button>
+
+    <!-- BALÃO DE AVISO RÁPIDO (TOAST) -->
+    <div id="nookToast" class="pointer-events-none opacity-0 transition-all duration-300 absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-[#4a443b] text-[#f5f0e8] px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-bold whitespace-nowrap border-2 border-[#e8d4b0]">
+      <img id="toastIcon" src="media/AC_froggychair.png" class="w-4 h-4 rounded-md object-contain" alt="">
+      <span id="toastText">Salvo!</span>
     </div>
-  </header>
 
-  <!-- BALÃO DE NOTIFICAÇÃO (TOAST) -->
-  <div id="nookToast">
-    <img id="toastIcon" src="media/AC_froggychair.png" alt="Nook">
-    <span id="toastText">Notificação!</span>
-  </div>
-
-  <main>
-    <!-- TELA 0: HOME (NOOKPHONE LAUNCHER) -->
-    <section id="screen-home" class="screen active">
-      <div class="nook-title-pill" id="homeBannerTitle">NookPhone</div>
-
-      <div class="app-grid">
-        <button class="app-btn" onclick="openApp('screen-time', 'Relógio de Ponto')">
-          <div class="squircle-icon"><img src="media/AC_clock.png" alt="Tempo"></div>
-          <span class="app-btn-label">Tempo</span>
-        </button>
-
-        <button class="app-btn" onclick="openApp('screen-stats', 'Nook Miles & Escala')">
-          <div class="squircle-icon"><img src="media/AC_calendar.png" alt="Métricas"></div>
-          <span class="app-btn-label">Métricas</span>
-        </button>
-
-        <button class="app-btn" onclick="openApp('screen-diary', 'Câmera do Diário')">
-          <div class="squircle-icon"><img src="media/AC_camera.png" alt="Câmera"></div>
-          <span class="app-btn-label">Novo Post</span>
-        </button>
-
-        <button class="app-btn" onclick="openApp('screen-archive', 'Acervo de Cartas VPS')">
-          <div class="squircle-icon"><img src="media/AC_post.png" alt="Acervo"></div>
-          <span class="app-btn-label">Acervo</span>
-        </button>
-
-        <button class="app-btn" onclick="openApp('screen-sync', 'Sincronia & Ajustes')">
-          <div class="squircle-icon"><img src="media/AC_settings.png" alt="Ajustes"></div>
-          <span class="app-btn-label">Ajustes</span>
-        </button>
-
-        <button class="app-btn" onclick="triggerFrogEasterEgg()">
-          <div class="squircle-icon"><img src="media/AC_froggychair.png" alt="Pausa"></div>
-          <span class="app-btn-label">Descanso</span>
-        </button>
-      </div>
-
-      <!-- Widget Rápido de Escala Diária -->
-      <div class="home-widget" onclick="openApp('screen-stats', 'Nook Miles & Escala')">
-        <img src="media/AC_calculator.png" alt="Escala">
-        <div style="flex:1;">
-          <div style="font-size:0.78rem; color:var(--nook-brown-light); font-weight:900;">HOJE NO PAPEL A3 (10m = 1mm)</div>
-          <div id="homeWidgetText" style="font-size:1rem; font-weight:900;">0 min • 0.0 mm (0.0% do dia)</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TELA 1: RELÓGIO DE PONTO (TEMPO) -->
-    <section id="screen-time" class="screen">
-      <div class="app-header">
-        <img src="media/AC_clock.png" alt="Tempo">
-        <h2>Relógio de Ponto</h2>
-      </div>
-
-      <div class="card">
-        <label>Data da Atividade</label>
-        <input type="date" id="timeDate" onchange="playNookSound('scroll')">
-
-        <label>Domínio da Rotina</label>
-        <input type="hidden" id="timeCategory" value="Acadêmico">
-        <div class="cat-selector">
-          <div class="cat-pill selected" onclick="selectCategory('Acadêmico', this)">
-            <img src="media/AC_google_doc.png" alt="Acadêmico"> Acadêmico
-          </div>
-          <div class="cat-pill" onclick="selectCategory('Pesquisa', this)">
-            <img src="media/AC_gyroid.png" alt="Pesquisa"> Pesquisa
-          </div>
-          <div class="cat-pill" onclick="selectCategory('Trabalho', this)">
-            <img src="media/AC_cooking.png" alt="Trabalho"> Trabalho
-          </div>
-          <div class="cat-pill" onclick="selectCategory('Bem-estar', this)">
-            <img src="media/AC_exercise.png" alt="Bem-estar"> Bem-estar
-          </div>
-        </div>
-
-        <div class="timer-box">
-          <div class="timer-digits" id="timerDisplay">00:00:00</div>
-          <button class="btn bg-mint" id="btnToggleTimer" onclick="toggleTimer()">▶ Iniciar Cronômetro</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <label>Entrada Manual (Múltiplos de 5m)</label>
-        <div style="display: flex; gap: 10px; margin-top:4px;">
-          <div style="flex:1;">
-            <label>Horas</label>
-            <input type="number" id="manualHours" placeholder="0" min="0" oninput="previewRounding()">
-          </div>
-          <div style="flex:1;">
-            <label>Minutos</label>
-            <input type="number" id="manualMinutes" placeholder="0" min="0" oninput="previewRounding()">
-          </div>
-        </div>
-        <p id="roundingPreview" style="font-size:0.86rem; color:var(--nook-brown-light); margin-top:10px; font-weight:800;">
-          Conversão automática: <strong>0 min</strong> (0.0 mm)
-        </p>
-        <button class="btn bg-yellow" onclick="saveManualTime()">Carimbar Minutos</button>
-      </div>
-    </section>
-
-    <!-- TELA 2: MÉTRICAS, ESCALA E NOOK MILES -->
-    <section id="screen-stats" class="screen">
-      <div class="app-header">
-        <img src="media/AC_calendar.png" alt="Métricas">
-        <h2>Nook Miles & Escala</h2>
-      </div>
-
-      <div class="card">
-        <label>Dia Selecionado</label>
-        <input type="date" id="statsDate" onchange="playNookSound('scroll'); renderStats();">
-
-        <div style="margin-top: 14px;">
-          <div style="display:flex; justify-content:space-between; font-weight:900; font-size:0.95rem;">
-            <span id="dayMinutesText">0 / 1440 min</span>
-            <span id="dayPercentText">0.0% do dia</span>
-          </div>
-          <div class="progress-bar">
-            <div id="dayProgressFill" class="progress-fill"></div>
-          </div>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:10px; background:var(--nook-cream); padding:10px 12px; border-radius:18px; margin-top:10px;">
-          <img src="media/AC_calculator.png" style="width:34px; height:34px; border-radius:8px;" alt="Escala">
-          <div>
-            <div style="font-size:0.75rem; font-weight:900; color:var(--nook-brown-light);">CONVERSÃO GEOMÉTRICA (10m = 1mm)</div>
-            <div id="scaleTotalText" style="font-size:0.95rem; font-weight:900;">0.0 mm (0.00 cm)</div>
-          </div>
-        </div>
-
-        <div id="categoryBreakdown" class="tag-list"></div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <img src="media/AC_health.png" style="width:28px; height:28px; border-radius:8px;" alt="Recordes">
-          <h2 style="font-size:1.05rem;">Streaks & Selos de Performance</h2>
-        </div>
-        <p style="font-size:0.88rem; margin-bottom:5px; font-weight:800;">🔥 Streak Ativo: <span id="streakCount">0</span> dias seguidos</p>
-        <p style="font-size:0.88rem; margin-bottom:5px; font-weight:800;">⭐ Recorde Diário: <span id="recordDay">0</span> min</p>
-        <p style="font-size:0.88rem; margin-bottom:8px; font-weight:800;">📅 Semana / Mês / Ano: <span id="periodTotals">0m / 0m / 0m</span></p>
-        <label>Carimbos Nook Miles</label>
-        <div id="autoTags" class="tag-list"></div>
-      </div>
-    </section>
-
-    <!-- TELA 3: NOVO REGISTRO NO DIÁRIO -->
-    <section id="screen-diary" class="screen">
-      <div class="app-header">
-        <img src="media/AC_camera.png" alt="Câmera">
-        <h2>Câmera do Diário</h2>
-      </div>
-
-      <div class="card">
-        <label>Fotografia ou Mídia</label>
-        <input type="file" id="diaryPhoto" accept="image/*" onchange="compressImage(event)">
-        <img id="photoPreview" style="width:100%; border-radius:18px; margin-top:10px; display:none; border:3px solid var(--nook-cream-dark);" />
-
-        <label>Legenda do Registro</label>
-        <textarea id="diaryCaption" rows="3" placeholder="O que aconteceu neste dia?"></textarea>
-
-        <label>Localização</label>
-        <input type="text" id="diaryLocation" placeholder="Ex: Laboratório, Ateliê, Niterói...">
-
-        <label>Data Real do Acontecimento</label>
-        <input type="date" id="diaryDateOccurred" onchange="playNookSound('scroll')">
-
-        <label>Destino do Registro</label>
-        <select id="diarySaveMode" onchange="toggleDelaySelect()">
-          <option value="agendado">🗓️ Agendar Postagem com Atraso</option>
-          <option value="rascunho">📝 Guardar como Rascunho no Acervo</option>
-        </select>
-
-        <div id="delayBox">
-          <label>Janela de Atraso</label>
-          <select id="diaryDelay" onchange="playNookSound('scroll')">
-            <option value="7">+1 Semana depois (7 dias)</option>
-            <option value="30">+1 Mês depois (30 dias)</option>
-          </select>
-        </div>
-
-        <button class="btn bg-orange" onclick="saveDiaryEntry()">📮 Carimbar e Guardar</button>
-      </div>
-    </section>
-
-    <!-- TELA 4: ACERVO DO VPS (ONLINE) -->
-    <section id="screen-archive" class="screen">
-      <div class="app-header" style="justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <img src="media/AC_post.png" alt="Acervo">
-          <h2>Acervo do VPS</h2>
-        </div>
-        <button class="btn btn-sm bg-sky" onclick="playNookSound('redo'); fetchVPSArchive();">🔄 Atualizar</button>
-      </div>
-
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="setArchiveFilter('todos', this)">Todos</button>
-        <button class="filter-btn" onclick="setArchiveFilter('agendado', this)">Agendados</button>
-        <button class="filter-btn" onclick="setArchiveFilter('rascunho', this)">Rascunhos</button>
-        <button class="filter-btn" onclick="setArchiveFilter('postado', this)">Postados</button>
-      </div>
-
-      <div id="archiveOfflineNotice" class="card" style="display:none; background:var(--nook-yellow);">
-        ⚠️ <strong>Modo Offline:</strong> Conecte o Wi-Fi para listar, editar ou cancelar itens guardados no VPS.
-      </div>
-
-      <div class="card" id="archiveContainer">
-        <p style="font-size:0.88rem; color:var(--nook-brown-light); font-weight:800;">Toque em "Atualizar" para abrir as cartas do servidor.</p>
-      </div>
-    </section>
-
-    <!-- TELA 5: SINCRONIA & CONFIGURAÇÃO -->
-    <section id="screen-sync" class="screen">
-      <div class="app-header">
-        <img src="media/AC_settings.png" alt="Ajustes">
-        <h2>Sincronia & Ajustes</h2>
-      </div>
-
-      <div class="card">
-        <label>Webhook Único do n8n (VPS)</label>
-        <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nooklog" onchange="saveWebhookUrl()">
-        <button class="btn bg-sky" onclick="syncQueueWithVPS(true)">✈️ Enviar Fila para o VPS</button>
-        <button class="btn bg-lavender" onclick="exportBackupJson()">💾 Baixar Backup Local (.JSON)</button>
-      </div>
-
-      <div class="card">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <img src="media/AC_dropbox.png" style="width:28px; height:28px; border-radius:8px;" alt="Fila">
-          <h2 style="font-size:1.02rem;">Bolso Offline do Aparelho</h2>
-        </div>
-        <div id="pendingList" style="font-size:0.85rem; color:var(--nook-brown-light); font-weight:800;">Nenhum item aguardando envio.</div>
-      </div>
-    </section>
-  </main>
-
-  <!-- MODAL DE EDIÇÃO DO ACERVO -->
-  <div id="editModal" class="modal-overlay">
-    <div class="modal-card">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-        <img src="media/AC_notes.png" style="width:30px; height:30px; border-radius:8px;" alt="Editar">
-        <h2 style="font-size:1.1rem;">Editar Carta do Acervo</h2>
-      </div>
-      <input type="hidden" id="editPostId">
-
-      <label>Status da Publicação</label>
-      <select id="editStatus" onchange="playNookSound('scroll')">
-        <option value="agendado">🗓️ Agendado para Postar</option>
-        <option value="rascunho">📝 Rascunho (Pausado)</option>
-      </select>
-
-      <label>Data Programada de Postagem</label>
-      <input type="date" id="editScheduledDate" onchange="playNookSound('scroll')">
-
-      <label>Local</label>
-      <input type="text" id="editLocation">
-
-      <label>Legenda</label>
-      <textarea id="editCaption" rows="4"></textarea>
-
-      <div style="display:flex; gap:10px; margin-top:14px;">
-        <button class="btn bg-mint" style="margin:0;" onclick="submitArchiveEdit()">Salvar no VPS</button>
-        <button class="btn" style="margin:0; background:var(--nook-cream-dark);" onclick="closeEditModal()">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTÃO HOME INFERIOR -->
-  <nav class="nav-bar">
-    <button class="home-btn" onclick="goHome()">
-      <img src="media/AC_froggychair.png" alt="Home">
-      <span>Menu NookPhone</span>
-    </button>
-  </nav>
-
-  <script>
-    // ==========================================
-    // 1. MOTOR DE ÁUDIO DO NOOKPHONE (media/sound/)
-    // ==========================================
-    const SOUND_PATHS = {
-      phoneOpen: 'media/sound/UI_Phone_Open.wav',
-      appStart: 'media/sound/UI_Phone_Start_4.wav',
-      menuOpen: 'media/sound/UI_PocketMenu_Open.wav',
-      menuClose: 'media/sound/UI_PocketMenu_Close.wav',
-      flag: 'media/sound/UI_Point_Flag.wav',
-      pointGet: 'media/sound/UI_Point_Get.wav',
-      stamp: 'media/sound/UI_Point_Stamp.wav',
-      postDelete: 'media/sound/UI_Post_Delete.wav',
-      postMove: 'media/sound/UI_Post_MovePresent.wav',
-      redo: 'media/sound/UI_Redo.wav',
-      scroll: 'media/sound/UI_Scroll.wav',
-      select: 'media/sound/UI_Select.wav',
-      balloon: 'media/sound/UI_Swkbd_BalloonAppear.wav',
-      enter: 'media/sound/UI_Swkbd_Enter.wav',
-      wait: 'media/sound/UI_Wait.wav',
-      nookSend: 'media/sound/Nook Send.mp3',
-      nookTritone: 'media/sound/Nook Tritone.mp3'
-    };
-
-    const audioCache = {};
-    let soundMuted = localStorage.getItem('nook_muted') === 'true';
-
-    function initSounds() {
-      Object.entries(SOUND_PATHS).forEach(([key, path]) => {
-        const a = new Audio(encodeURI(path));
-        a.preload = 'auto';
-        audioCache[key] = a;
-      });
-      updateSoundToggleUI();
-    }
-
-    function playNookSound(name) {
-      if (soundMuted || !audioCache[name]) return;
-      try {
-        const snd = audioCache[name];
-        snd.currentTime = 0;
-        snd.play().catch(() => {});
-      } catch (e) {}
-    }
-
-    function toggleMute() {
-      soundMuted = !soundMuted;
-      localStorage.setItem('nook_muted', soundMuted);
-      updateSoundToggleUI();
-      if (!soundMuted) playNookSound('nookTritone');
-    }
-
-    function updateSoundToggleUI() {
-      document.getElementById('btnSoundToggle').textContent = soundMuted ? '🔇 Mudo' : '🔊 Som';
-    }
-
-    // Balão Toast Personalizado
-    let toastTimeout = null;
-    function showNookToast(message, iconPath = 'media/AC_froggychair.png', soundKey = 'balloon') {
-      if (soundKey) playNookSound(soundKey);
-      const toast = document.getElementById('nookToast');
-      document.getElementById('toastIcon').src = iconPath;
-      document.getElementById('toastText').textContent = message;
-      toast.classList.add('show');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    function triggerFrogEasterEgg() {
-      showNookToast('Respire fundo! Pausa no Froggy Chair 🐸🍵', 'media/AC_roost.png', 'nookTritone');
-    }
-
-    // ==========================================
-    // 2. BANCO DE DADOS LOCAL (INDEXEDDB)
-    // ==========================================
-    let db;
-    let vpsArchiveItems = [];
-    let currentArchiveFilter = 'todos';
-
-    const request = indexedDB.open("NookLogDB", 2);
-
-    request.onupgradeneeded = (e) => {
-      db = e.target.result;
-      if (!db.objectStoreNames.contains("timeLogs")) {
-        db.createObjectStore("timeLogs", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("diaryQueue")) {
-        db.createObjectStore("diaryQueue", { keyPath: "id" });
-      }
-    };
-
-    request.onsuccess = (e) => {
-      db = e.target.result;
-      updateQueueCounter();
-      renderStats();
-    };
-
-    // ==========================================
-    // 3. NAVEGAÇÃO DO NOOKPHONE
-    // ==========================================
-    function openApp(screenId, titleText) {
-      playNookSound('appStart');
-      if (titleText) document.getElementById('homeBannerTitle').textContent = titleText;
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(screenId).classList.add('active');
-      if (screenId === 'screen-stats') renderStats();
-      if (screenId === 'screen-sync') renderPendingQueue();
-      if (screenId === 'screen-archive') fetchVPSArchive();
-    }
-
-    function goHome() {
-      const isHome = document.getElementById('screen-home').classList.contains('active');
-      playNookSound(isHome ? 'phoneOpen' : 'menuClose');
-      document.getElementById('homeBannerTitle').textContent = 'NookPhone';
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-home').classList.add('active');
-      renderStats();
-    }
-
-    function todayISO() {
-      const tzOffset = (new Date()).getTimezoneOffset() * 60000;
-      return (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
-    }
-
-    document.getElementById('timeDate').value = todayISO();
-    document.getElementById('statsDate').value = todayISO();
-    document.getElementById('diaryDateOccurred').value = todayISO();
-    document.getElementById('webhookUrl').value = localStorage.getItem('nook_webhook') || '';
-
-    setInterval(() => {
-      document.getElementById('clockDisplay').textContent = new Date().toTimeString().slice(0,5);
-    }, 1000);
-
-    // ==========================================
-    // 4. MÓDULO DE TEMPO (MÚLTIPLOS DE 5)
-    // ==========================================
-    function selectCategory(catName, el) {
-      playNookSound('select');
-      document.getElementById('timeCategory').value = catName;
-      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
-      el.classList.add('selected');
-    }
-
-    function roundTo5(minutes) {
-      const r = Math.round(minutes / 5) * 5;
-      return r === 0 && minutes > 0 ? 5 : r;
-    }
-
-    function previewRounding() {
-      playNookSound('scroll');
-      const h = parseInt(document.getElementById('manualHours').value) || 0;
-      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
-      const rounded = roundTo5((h * 60) + m);
-      document.getElementById('roundingPreview').innerHTML = 
-        `Conversão automática: <strong>${rounded} min</strong> (${(rounded/10).toFixed(1)} mm)`;
-    }
-
-    function saveManualTime() {
-      const h = parseInt(document.getElementById('manualHours').value) || 0;
-      const m = parseInt(document.getElementById('manualMinutes').value) || 0;
-      const totalRaw = (h * 60) + m;
-      if (totalRaw <= 0) {
-        return showNookToast('Insira um tempo maior que zero!', 'media/AC_clock.png', 'redo');
-      }
-      storeTimeEntry(roundTo5(totalRaw));
-      document.getElementById('manualHours').value = '';
-      document.getElementById('manualMinutes').value = '';
-      previewRounding();
-    }
-
-    let timerInterval = null;
-    let timerStart = null;
-
-    function toggleTimer() {
-      const btn = document.getElementById('btnToggleTimer');
-      if (!timerInterval) {
-        playNookSound('flag');
-        timerStart = Date.now();
-        btn.textContent = "⏹ Parar e Carimbar";
-        btn.className = "btn bg-coral";
-        timerInterval = setInterval(() => {
-          const diffSec = Math.floor((Date.now() - timerStart) / 1000);
-          const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
-          const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
-          const secs = String(diffSec % 60).padStart(2, '0');
-          document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
-        }, 1000);
-      } else {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        const elapsedMin = (Date.now() - timerStart) / 60000;
-        btn.textContent = "▶ Iniciar Cronômetro";
-        btn.className = "btn bg-mint";
-        document.getElementById('timerDisplay').textContent = "00:00:00";
-        storeTimeEntry(roundTo5(elapsedMin));
-      }
-    }
-
-    function storeTimeEntry(minutes) {
-      const entry = {
-        action: "create_time",
-        id: "time_" + Date.now(),
-        date: document.getElementById('timeDate').value,
-        category: document.getElementById('timeCategory').value,
-        minutes: minutes,
-        mm_scale: Number((minutes / 10).toFixed(2)),
-        synced: false
-      };
-      const tx = db.transaction("timeLogs", "readwrite");
-      tx.objectStore("timeLogs").put(entry);
-      tx.oncomplete = () => {
-        showNookToast(`+${minutes}m (${entry.mm_scale}mm) em ${entry.category}!`, 'media/AC_clock.png', 'pointGet');
-        updateQueueCounter();
-        renderStats();
-      };
-    }
-
-    // ==========================================
-    // 5. ESTATÍSTICAS E ESCALA FÍSICA
-    // ==========================================
-    function renderStats() {
-      if (!db) return;
-      const targetDate = document.getElementById('statsDate').value;
-      const tx = db.transaction("timeLogs", "readonly");
-      const req = tx.objectStore("timeLogs").getAll();
-
-      req.onsuccess = () => {
-        const logs = req.result;
-        const dayLogs = logs.filter(l => l.date === targetDate);
-        const dayTotal = dayLogs.reduce((acc, cur) => acc + cur.minutes, 0);
-        const dayPercent = ((dayTotal / 1440) * 100).toFixed(1);
-
-        document.getElementById('dayMinutesText').textContent = `${dayTotal} / 1440 min`;
-        document.getElementById('dayPercentText').textContent = `${dayPercent}% do dia`;
-        document.getElementById('dayProgressFill').style.width = `${Math.min(dayPercent, 100)}%`;
-        document.getElementById('scaleTotalText').textContent = 
-          `${(dayTotal / 10).toFixed(1)} mm (${(dayTotal / 100).toFixed(2)} cm)`;
-
-        // Atualiza também o widget da tela inicial com os dados de hoje
-        const todayLogs = logs.filter(l => l.date === todayISO());
-        const todaySum = todayLogs.reduce((acc, cur) => acc + cur.minutes, 0);
-        document.getElementById('homeWidgetText').textContent = 
-          `${todaySum} min • ${(todaySum / 10).toFixed(1)} mm (${((todaySum / 1440) * 100).toFixed(1)}% do dia)`;
-
-        const catTotals = {};
-        dayLogs.forEach(l => catTotals[l.category] = (catTotals[l.category] || 0) + l.minutes);
-        document.getElementById('categoryBreakdown').innerHTML = Object.entries(catTotals)
-          .map(([cat, min]) => `<span class="nook-stamp">📌 ${cat}: ${min}m (${(min/10).toFixed(1)}mm)</span>`)
-          .join('');
-
-        const mapByDate = {};
-        logs.forEach(l => mapByDate[l.date] = (mapByDate[l.date] || 0) + l.minutes);
-        const allDailyTotals = Object.values(mapByDate);
-        document.getElementById('recordDay').textContent = allDailyTotals.length ? Math.max(...allDailyTotals) : 0;
-
-        let streak = 0;
-        let checkDate = new Date(todayISO() + "T12:00:00");
-        while (true) {
-          const iso = checkDate.toISOString().split('T')[0];
-          if (mapByDate[iso] && mapByDate[iso] > 0) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1);
-          } else {
-            break;
-          }
-        }
-        document.getElementById('streakCount').textContent = streak;
-
-        const curMonth = targetDate.slice(0, 7);
-        const curYear = targetDate.slice(0, 4);
-        const nowMs = new Date(targetDate + "T12:00:00").getTime();
-
-        let weekSum = 0, monthSum = 0, yearSum = 0;
-        logs.forEach(l => {
-          const diffDays = (nowMs - new Date(l.date + "T12:00:00").getTime()) / 86400000;
-          if (diffDays >= 0 && diffDays < 7) weekSum += l.minutes;
-          if (l.date.startsWith(curMonth)) monthSum += l.minutes;
-          if (l.date.startsWith(curYear)) yearSum += l.minutes;
-        });
-        document.getElementById('periodTotals').textContent = `${weekSum}m / ${monthSum}m / ${yearSum}m`;
-
-        const tags = [];
-        if (dayTotal >= 360) tags.push("⚡ Alta Densidade (+25%)");
-        if (streak >= 3) tags.push(`🔥 Consistência (${streak}d)`);
-        if ((catTotals["Pesquisa"] || 0) >= 120) tags.push("🔬 Foco Pesquisa");
-        if ((catTotals["Bem-estar"] || 0) >= 30) tags.push("🌿 Equilíbrio");
-        if (tags.length === 0) tags.push("🌱 Dia em Construção");
-        document.getElementById('autoTags').innerHTML = tags.map(t => `<span class="nook-stamp">${t}</span>`).join('');
-      };
-    }
-
-    // ==========================================
-    // 6. NOVO POST (DUPLA COMPRESSÃO + CARIMBO)
-    // ==========================================
-    let currentFullBase64 = null;
-    let currentThumbBase64 = null;
-
-    function toggleDelaySelect() {
-      playNookSound('scroll');
-      const mode = document.getElementById('diarySaveMode').value;
-      document.getElementById('delayBox').style.display = (mode === 'agendado') ? 'block' : 'none';
-    }
-
-    function compressImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      playNookSound('select');
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvasFull = document.createElement('canvas');
-          const scaleFull = img.width > 1080 ? 1080 / img.width : 1;
-          canvasFull.width = img.width * scaleFull;
-          canvasFull.height = img.height * scaleFull;
-          canvasFull.getContext('2d').drawImage(img, 0, 0, canvasFull.width, canvasFull.height);
-          currentFullBase64 = canvasFull.toDataURL('image/jpeg', 0.72);
-
-          const canvasThumb = document.createElement('canvas');
-          const scaleThumb = img.width > 280 ? 280 / img.width : 1;
-          canvasThumb.width = img.width * scaleThumb;
-          canvasThumb.height = img.height * scaleThumb;
-          canvasThumb.getContext('2d').drawImage(img, 0, 0, canvasThumb.width, canvasThumb.height);
-          currentThumbBase64 = canvasThumb.toDataURL('image/jpeg', 0.6);
-
-          const preview = document.getElementById('photoPreview');
-          preview.src = currentThumbBase64;
-          preview.style.display = 'block';
-          showNookToast('Foto revelada e otimizada!', 'media/AC_camera.png', 'enter');
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function saveDiaryEntry() {
-      const caption = document.getElementById('diaryCaption').value.trim();
-      const dateOccurred = document.getElementById('diaryDateOccurred').value;
-      const statusMode = document.getElementById('diarySaveMode').value;
-      const delayDays = parseInt(document.getElementById('diaryDelay').value);
-
-      if (!currentFullBase64 && !caption) {
-        return showNookToast('Adicione foto ou legenda primeiro!', 'media/AC_camera.png', 'redo');
-      }
-
-      const targetDateObj = new Date(dateOccurred + "T12:00:00");
-      targetDateObj.setDate(targetDateObj.getDate() + delayDays);
-      const scheduledDate = targetDateObj.toISOString().split('T')[0];
-
-      const entry = {
-        action: "create_post",
-        id: "post_" + Date.now(),
-        date_occurred: dateOccurred,
-        scheduled_post_date: scheduledDate,
-        status: statusMode,
-        location: document.getElementById('diaryLocation').value.trim(),
-        caption: caption,
-        thumb_base64: currentThumbBase64,
-        image_base64: currentFullBase64,
-        synced: false
-      };
-
-      const tx = db.transaction("diaryQueue", "readwrite");
-      tx.objectStore("diaryQueue").put(entry);
-      tx.oncomplete = () => {
-        showNookToast(
-          statusMode === 'rascunho' ? 'Rascunho carimbado!' : `Agendado para ${scheduledDate}!`,
-          'media/AC_post.png',
-          'stamp'
-        );
-        document.getElementById('diaryCaption').value = '';
-        document.getElementById('diaryLocation').value = '';
-        document.getElementById('photoPreview').style.display = 'none';
-        currentFullBase64 = null;
-        currentThumbBase64 = null;
-        updateQueueCounter();
-        if (navigator.onLine) syncQueueWithVPS(false);
-      };
-    }
-
-    // ==========================================
-    // 7. ACERVO DO VPS (LISTAR, EDITAR, CANCELAR)
-    // ==========================================
-    function setArchiveFilter(filter, btnEl) {
-      playNookSound('scroll');
-      currentArchiveFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
-      renderArchiveList();
-    }
-
-    async function fetchVPSArchive() {
-      const webhook = localStorage.getItem('nook_webhook');
-      const notice = document.getElementById('archiveOfflineNotice');
-      const container = document.getElementById('archiveContainer');
-
-      if (!navigator.onLine) {
-        notice.style.display = 'block';
-        return;
-      }
-      notice.style.display = 'none';
-
-      if (!webhook) {
-        container.innerHTML = `<p style="font-size:0.88rem; color:var(--nook-brown-light); font-weight:800;">Configure a URL do Webhook no app Ajustes.</p>`;
-        return;
-      }
-
-      playNookSound('wait');
-      container.innerHTML = `<p style="font-size:0.88rem; color:var(--nook-brown-light); font-weight:800;">⏳ Consultando cartas no VPS...</p>`;
-
-      try {
-        await syncQueueWithVPS(false);
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "list_posts" })
-        });
-        const data = await resp.json();
-        vpsArchiveItems = Array.isArray(data) ? data : (data.items || []);
-        renderArchiveList();
-      } catch (err) {
-        container.innerHTML = `<p style="font-size:0.88rem; color:var(--nook-coral); font-weight:800;">Não foi possível conectar ao VPS. Verifique o Webhook e o CORS.</p>`;
-      }
-    }
-
-    function renderArchiveList() {
-      const container = document.getElementById('archiveContainer');
-      const filtered = vpsArchiveItems.filter(item => {
-        if (currentArchiveFilter === 'todos') return true;
-        return item.status === currentArchiveFilter;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<p style="font-size:0.88rem; color:var(--nook-brown-light); font-weight:800;">Nenhuma carta encontrada neste filtro.</p>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const badgeClass = `st-${item.status || 'rascunho'}`;
-        const canModify = item.status !== 'postado';
-        const thumbSrc = item.thumb_base64 || 'media/AC_gallery.png';
-
-        return `
-          <div class="archive-item">
-            <img class="archive-thumb" src="${thumbSrc}" alt="Miniatura" />
-            <div class="archive-info">
-              <div style="display:flex; align-items:center; gap:6px;">
-                <span class="status-badge ${badgeClass}">${item.status}</span>
-                <img src="media/AC_instagram.png" style="width:16px; height:16px; border-radius:4px;" alt="IG">
-                <img src="media/AC_twitter.png" style="width:16px; height:16px; border-radius:4px;" alt="X">
-              </div>
-              <div style="font-size:0.76rem; color:var(--nook-brown-light); font-weight:800;">
-                📍 ${item.location || 'Sem local'} • Ocorreu: ${item.date_occurred}
-              </div>
-              <div style="font-size:0.78rem; color:var(--nook-brown); font-weight:900; margin-bottom:4px;">
-                🗓️ Disparo: ${item.scheduled_post_date || '—'}
-              </div>
-              <p style="font-size:0.86rem; color:var(--nook-brown); font-weight:700; word-break:break-word;">
-                ${item.caption || '<em>Sem legenda</em>'}
-              </p>
-              ${canModify ? `
-                <div class="archive-actions">
-                  <button class="btn btn-sm bg-yellow" onclick="openEditModal('${item.id}')">✏️ Editar</button>
-                  ${item.status !== 'cancelado' ? `
-                    <button class="btn btn-sm bg-coral" onclick="cancelScheduledPost('${item.id}')">✖ Cancelar</button>
-                  ` : ''}
+    <!-- CORPO PRINCIPAL ROLÁVEL -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar">
+
+      <!-- ========================================== -->
+      <!-- TELA 0: GRADE 3x3 DO NOOKPHONE             -->
+      <!-- ========================================== -->
+      <section id="screen-home" class="screen active">
+        <div class="flex-1 flex flex-col justify-start px-6 py-[18px]">
+          <div class="grid grid-cols-3 gap-x-6 gap-y-5 w-full">
+
+            <!-- 1. Timer / Ponto -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-time', 'Timer')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 relative w-full">
+                <img alt="Timer" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_clock.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Timer</span>
+              </button>
+            </div>
+
+            <!-- 2. Escala A3 / Calculadora -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-scale', 'Escala A3')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Escala A3" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_calculator.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Escala A3</span>
+              </button>
+            </div>
+
+            <!-- 3. Calendário / Métricas -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-stats', 'Métricas')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Calendário" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_calendar.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Métricas</span>
+              </button>
+            </div>
+
+            <!-- 4. Câmera / Diário -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-diary', 'Câmera')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Câmera" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_camera.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Diário</span>
+              </button>
+            </div>
+
+            <!-- 5. Acervo VPS -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-archive', 'Acervo VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Acervo" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_gallery.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Acervo</span>
+              </button>
+            </div>
+
+            <!-- 6. Fila de Postagens -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-sync', 'Fila & VPS')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <div class="relative">
+                  <img alt="Postagens" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_post.png">
+                  <span id="badgeQueue" class="hidden absolute -top-1 -right-1 bg-[#ee7b6d] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
                 </div>
-              ` : ''}
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Fila VPS</span>
+              </button>
+            </div>
+
+            <!-- 7. The Roost (Pausa/Bem-estar) -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="quickWellbeingStamp()" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="The Roost" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_roost.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">The Roost</span>
+              </button>
+            </div>
+
+            <!-- 8. Recordes & Streaks -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-records', 'Recordes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Recordes" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_health.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Streaks</span>
+              </button>
+            </div>
+
+            <!-- 9. Ajustes -->
+            <div class="animate-fade-in-up-slow">
+              <button onclick="openApp('screen-sync', 'Ajustes')" class="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95 w-full">
+                <img alt="Ajustes" width="80" height="80" class="rounded-3xl shadow-md w-[76px] h-[76px] object-cover" src="media/AC_settings.png">
+                <span class="text-xs font-semibold text-center leading-tight text-[#3d3d3d]">Ajustes</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TELA 1: TIMER & MINUTOS (MÚLTIPLOS DE 5)   -->
+      <!-- ========================================== -->
+      <section id="screen-time" class="screen px-5 py-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <img src="media/AC_clock.png" class="w-7 h-7 rounded-xl shadow-sm" alt="">
+            <h2 class="text-sm font-bold text-[#3d3d3d]">Registro de Tempo</h2>
+          </div>
+          <button onclick="goHome()" class="text-xs font-bold text-[#8c7b6b] bg-[#e8e0d0] px-3 py-1 rounded-full">Voltar</button>
+        </div>
+
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] mb-3">
+          <div class="grid grid-cols-2 gap-2 mb-2.5">
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Data</label>
+              <input type="date" id="timeDate" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 text-[#3d3d3d]">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Categoria</label>
+              <select id="timeCategory" onchange="playNookSound('select')" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2 py-1.5 text-[#3d3d3d]">
+                <option value="Acadêmico">📚 Acadêmico</option>
+                <option value="Pesquisa">🔬 Pesquisa</option>
+                <option value="Trabalho">🛠️ Trabalho</option>
+                <option value="Bem-estar">🧘‍♀️ Bem-estar</option>
+              </select>
             </div>
           </div>
-        `;
-      }).join('');
-    }
 
-    function openEditModal(postId) {
-      if (!navigator.onLine) {
-        return showNookToast('Conecte o Wi-Fi para editar no VPS!', 'media/AC_settings.png', 'redo');
-      }
-      const item = vpsArchiveItems.find(i => String(i.id) === String(postId));
-      if (!item) return;
+          <div class="bg-[#f5f0e8] rounded-2xl p-3 text-center border border-[#e0daca]">
+            <div id="timerDisplay" class="text-3xl font-bold text-[#3d3d3d] tracking-wider mb-2">00:00:00</div>
+            <button id="btnToggleTimer" onclick="toggleTimer()" class="w-full bg-[#88d4ab] text-[#2d4739] font-bold text-xs py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform">
+              ▶ Iniciar Timer
+            </button>
+          </div>
+        </div>
 
-      playNookSound('menuOpen');
-      document.getElementById('editPostId').value = item.id;
-      document.getElementById('editStatus').value = item.status === 'cancelado' ? 'rascunho' : item.status;
-      document.getElementById('editScheduledDate').value = item.scheduled_post_date;
-      document.getElementById('editLocation').value = item.location || '';
-      document.getElementById('editCaption').value = item.caption || '';
-      document.getElementById('editModal').classList.add('open');
-    }
-
-    function closeEditModal() {
-      playNookSound('menuClose');
-      document.getElementById('editModal').classList.remove('open');
-    }
-
-    async function submitArchiveEdit() {
-      const webhook = localStorage.getItem('nook_webhook');
-      if (!webhook || !navigator.onLine) return showNookToast('Sem conexão com o VPS!', 'media/AC_settings.png', 'redo');
-
-      const payload = {
-        action: "update_post",
-        id: document.getElementById('editPostId').value,
-        status: document.getElementById('editStatus').value,
-        scheduled_post_date: document.getElementById('editScheduledDate').value,
-        location: document.getElementById('editLocation').value.trim(),
-        caption: document.getElementById('editCaption').value.trim()
-      };
-
-      try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (resp.ok) {
-          document.getElementById('editModal').classList.remove('open');
-          showNookToast('Carta atualizada no VPS!', 'media/AC_post.png', 'postMove');
-          fetchVPSArchive();
-        }
-      } catch (err) {
-        showNookToast('Erro ao salvar edição no VPS.', 'media/AC_settings.png', 'redo');
-      }
-    }
-
-    async function cancelScheduledPost(postId) {
-      if (!navigator.onLine) return showNookToast('Conecte-se para cancelar no VPS!', 'media/AC_settings.png', 'redo');
-      if (!confirm("Cancelar o agendamento desta postagem?")) return;
-
-      const webhook = localStorage.getItem('nook_webhook');
-      try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "cancel_post", id: postId })
-        });
-        if (resp.ok) {
-          showNookToast('Postagem cancelada!', 'media/AC_post.png', 'postDelete');
-          fetchVPSArchive();
-        }
-      } catch (err) {
-        showNookToast('Falha ao comunicar com o VPS.', 'media/AC_settings.png', 'redo');
-      }
-    }
-
-    // ==========================================
-    // 8. SINCRONIZAÇÃO OFFLINE -> VPS
-    // ==========================================
-    function saveWebhookUrl() {
-      localStorage.setItem('nook_webhook', document.getElementById('webhookUrl').value.trim());
-      showNookToast('Webhook do n8n salvo!', 'media/AC_settings.png', 'enter');
-    }
-
-    function updateNetworkUI() {
-      const bars = document.getElementById('signalBars');
-      const txt = document.getElementById('netStatusText');
-      if (navigator.onLine) {
-        bars.classList.add('online');
-        txt.textContent = "NookNet";
-        syncQueueWithVPS(false);
-      } else {
-        bars.classList.remove('online');
-        txt.textContent = "Offline";
-      }
-    }
-
-    window.addEventListener('online', updateNetworkUI);
-    window.addEventListener('offline', updateNetworkUI);
-
-    function updateQueueCounter() {
-      if (!db) return;
-      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
-      const r1 = tx.objectStore("timeLogs").getAll();
-      const r2 = tx.objectStore("diaryQueue").getAll();
-      tx.oncomplete = () => {
-        const p1 = r1.result.filter(i => !i.synced).length;
-        const p2 = r2.result.filter(i => !i.synced).length;
-        document.getElementById('queueCounter').textContent = `Fila: ${p1 + p2}`;
-      };
-    }
-
-    function renderPendingQueue() {
-      if (!db) return;
-      const tx = db.transaction("diaryQueue", "readonly");
-      const req = tx.objectStore("diaryQueue").getAll();
-      req.onsuccess = () => {
-        const pending = req.result.filter(i => !i.synced);
-        const container = document.getElementById('pendingList');
-        if (pending.length === 0) {
-          container.innerHTML = "Todas as fotos e legendas já subiram para o VPS.";
-          return;
-        }
-        container.innerHTML = pending.map(p => 
-          `<div style="padding:8px 0; border-bottom:1px dashed var(--nook-cream-dark);">
-            📸 <strong>[${p.status.toUpperCase()}]</strong> ${p.date_occurred} → Postar: ${p.scheduled_post_date}<br>
-            <span>${(p.caption || '').slice(0, 50)}...</span>
-          </div>`
-        ).join('');
-      };
-    }
-
-    async function syncQueueWithVPS(manualTrigger = false) {
-      const webhook = localStorage.getItem('nook_webhook');
-      if (!webhook || !navigator.onLine || !db) {
-        if (manualTrigger) showNookToast('Verifique o Wi-Fi e o Webhook!', 'media/AC_settings.png', 'redo');
-        return;
-      }
-
-      if (manualTrigger) playNookSound('nookSend');
-
-      let sentCount = 0;
-
-      const txDiary = db.transaction("diaryQueue", "readonly");
-      const diaryItems = await new Promise(res => {
-        const r = txDiary.objectStore("diaryQueue").getAll();
-        r.onsuccess = () => res(r.result.filter(i => !i.synced));
-      });
-
-      for (const item of diaryItems) {
-        try {
-          const resp = await fetch(webhook, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
-          if (resp.ok) {
-            sentCount++;
-            const delTx = db.transaction("diaryQueue", "readwrite");
-            delTx.objectStore("diaryQueue").delete(item.id);
-          }
-        } catch (err) {}
-      }
-
-      const txTime = db.transaction("timeLogs", "readonly");
-      const timeItems = await new Promise(res => {
-        const r = txTime.objectStore("timeLogs").getAll();
-        r.onsuccess = () => res(r.result.filter(i => !i.synced));
-      });
-
-      for (const item of timeItems) {
-        try {
-          const resp = await fetch(webhook, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
-          if (resp.ok) {
-            sentCount++;
-            item.synced = true;
-            const putTx = db.transaction("timeLogs", "readwrite");
-            putTx.objectStore("timeLogs").put(item);
-          }
-        } catch (err) {}
-      }
-
-      updateQueueCounter();
-      renderPendingQueue();
-
-      if (sentCount > 0 || manualTrigger) {
-        showNookToast(`Sincronia concluída (${sentCount} enviados)!`, 'media/AC_froggychair.png', 'nookTritone');
-      }
-    }
-
-    function exportBackupJson() {
-      playNookSound('select');
-      const tx = db.transaction(["timeLogs", "diaryQueue"], "readonly");
-      const r1 = tx.objectStore("timeLogs").getAll();
-      const r2 = tx.objectStore("diaryQueue").getAll();
-      tx.oncomplete = () => {
-        const blob = new Blob([JSON.stringify({ timeLogs: r1.result, diaryQueue: r2.result }, null, 2)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `nookphone-backup-${todayISO()}.json`;
-        a.click();
-      };
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-    initSounds();
-    updateNetworkUI();
-  </script>
-</body>
-</html>
+        <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca]">
+          <div class="text-xs font-bold text-[#3d3d3d] mb-2">Adicionar Horas/Minutos</div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b]">HORAS</label>
+              <input type="number" id="manualHours" placeholder="0" min="0" oninput="previewRounding()" class="w-full text-xs font-bold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-[#8c7b6b
