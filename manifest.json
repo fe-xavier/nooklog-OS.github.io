@@ -1,14 +1,14 @@
 {
-  "name": "NookLog OS",
-  "short_name": "NookLog",
+  "name": "NookPhone OS",
+  "short_name": "NookPhone",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f1ea",
-  "theme_color": "#e8f4ea",
+  "background_color": "#f5f0e1",
+  "theme_color": "#f5f0e1",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2917/2917995.png",
+      "src": "media/AC_froggychair.png",
       "sizes": "512x512",
       "type": "image/png"
     }
