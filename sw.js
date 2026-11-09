@@ -1,8 +1,9 @@
-const CACHE_NAME = 'nookphone-v11';
+const CACHE_NAME = 'nookphone-v12';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './tailwind.css',
   './media/AC_clock.png',
   './media/AC_calculator.png',
   './media/AC_calendar.png',
