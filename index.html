@@ -8,7 +8,6 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="media/AC_froggychair.png">
   <title>NookPhone</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -59,6 +58,7 @@
       background-color: rgba(255,255,255,.7) !important;
     }
   </style>
+  <link rel="stylesheet" href="tailwind.css">
 </head>
 <body class="bg-[#f5f0e8] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
 
@@ -542,6 +542,13 @@
             <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">URL do Webhook no n8n</label>
             <input type="url" id="webhookUrl" placeholder="https://seu-vps.com.br/webhook/nook" onchange="saveWebhookUrl()" class="w-full text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5 mt-0.5">
           </div>
+          <div>
+            <label class="text-[10px] font-bold text-[#8c7b6b] uppercase">Token de segurança</label>
+            <div class="flex gap-1.5 mt-0.5">
+              <input type="password" id="webhookToken" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="o mesmo token do n8n" onchange="saveToken()" class="flex-1 min-w-0 text-xs font-semibold bg-[#f5f0e8] border border-[#e0daca] rounded-xl px-2.5 py-1.5">
+              <button onclick="generateToken()" class="flex-shrink-0 bg-[#fde293] text-[#5a4b3c] font-bold text-[10px] px-3 rounded-xl active:scale-95 transition-transform">Gerar</button>
+            </div>
+          </div>
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
               <div class="text-xs font-bold text-[#3d3d3d]">Sincronizar sozinho</div>
@@ -597,9 +604,12 @@
         <div class="bg-[#fffdf9] rounded-3xl p-3.5 shadow-sm border border-[#e0daca] space-y-2">
           <div class="text-xs font-bold text-[#3d3d3d] flex items-center gap-1.5"><span data-icon="database" class="ic"></span>Dados</div>
           <div class="grid grid-cols-2 gap-2">
-            <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Backup JSON</button>
-            <button onclick="confirmClearCache()" class="bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Limpar cache</button>
+            <button onclick="exportBackupJson()" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Exportar backup</button>
+            <button onclick="openFilePicker('backupFile')" class="bg-[#cdb4db] text-[#3f2e4c] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Importar backup</button>
+            <button onclick="pullTimeLogsFromVPS(true)" class="col-span-2 bg-[#8ecae6] text-[#234352] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1.5"><span data-icon="cloud" class="ic"></span>Puxar histórico do VPS</button>
+            <button onclick="confirmClearCache()" class="col-span-2 bg-[#e0daca] text-[#3d3d3d] font-bold text-xs py-2 rounded-2xl shadow-sm active:scale-95 transition-transform">Limpar cache</button>
           </div>
+          <input type="file" id="backupFile" accept=".json,application/json" onchange="importBackupJson(event)" class="hidden">
         </div>
       </section>
 
@@ -1160,6 +1170,7 @@
       db = e.target.result;
       updateQueueCounter();
       renderStats();
+      setTimeout(maybeOfferPull, 1500); // aparelho vazio? oferece buscar o histórico no VPS
     };
 
     function todayISO() {
@@ -1210,6 +1221,7 @@
     document.getElementById('scaleDate').value = todayISO();
     document.getElementById('diaryDateOccurred').value = todayISO();
     document.getElementById('webhookUrl').value = localStorage.getItem('nook_webhook') || '';
+    document.getElementById('webhookToken').value = localStorage.getItem('nook_token') || '';
 
     // ==========================================
     // 4. NAVEGAÇÃO ENTRE APLICATIVOS
@@ -2221,11 +2233,11 @@
       try {
         await syncQueueWithVPS(false);
         pullSettings();
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "list_posts" })
-        });
+        const resp = await nookPost({ action: "list_posts" });
+        if (authFailed(resp)) {
+          container.innerHTML = `<p class="text-[#ee7b6d] font-bold">O VPS recusou o token. Confira em Ajustes.</p>`;
+          return;
+        }
         const data = await resp.json();
         vpsArchiveItems = Array.isArray(data) ? data : (data.items || []);
         renderArchiveList();
@@ -2369,11 +2381,7 @@
       const ok = await nookConfirm('Esse registro será apagado do VPS de vez.', { title: 'Apagar registro?', okText: 'Apagar', cancelText: 'Manter', danger: true });
       if (!ok) return false;
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "delete_post", id: id })
-        });
+        const resp = await nookPost({ action: "delete_post", id: id });
         if (resp.ok) {
           showNookToast('Registro apagado!', 'media/AC_post.png', 'postDelete');
           fetchVPSArchive();
@@ -2407,11 +2415,7 @@
       };
 
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        const resp = await nookPost(payload);
         if (resp.ok) {
           closeEditModal();
           showNookToast('Atualizado no VPS!', 'media/AC_post.png', 'postMove');
@@ -2429,11 +2433,7 @@
 
       const webhook = localStorage.getItem('nook_webhook');
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "cancel_post", id: postId })
-        });
+        const resp = await nookPost({ action: "cancel_post", id: postId });
         if (resp.ok) {
           showNookToast('Postagem cancelada!', 'media/AC_post.png', 'postDelete');
           fetchVPSArchive();
@@ -2492,15 +2492,10 @@
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 8000);
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "ping" }),
-          signal: ctrl.signal
-        });
+        const resp = await nookPost({ action: "ping" }, { signal: ctrl.signal });
         clearTimeout(timer);
         if (resp.ok) showNookToast('Conexão OK!', 'media/AC_froggychair.png', 'nookTritone');
-        else showNookToast(`O webhook respondeu ${resp.status}`, 'media/AC_settings.png', 'redo');
+        else if (!authFailed(resp)) showNookToast(`O webhook respondeu ${resp.status}`, 'media/AC_settings.png', 'redo');
       } catch (e) {
         clearTimeout(timer);
         showNookToast('O VPS não respondeu', 'media/AC_settings.png', 'redo');
@@ -2528,6 +2523,228 @@
         initSettings.done = true;
       }
       updatePauseUI();
+    }
+
+    // ==========================================
+    // 9b. TOKEN DO WEBHOOK + IMPORTAR BACKUP + PUXAR DO VPS
+    // ==========================================
+    function getToken() { return localStorage.getItem('nook_token') || ''; }
+
+    function authFailed(resp) { return !!resp && (resp.status === 401 || resp.status === 403); }
+
+    let lastAuthToastAt = 0;
+    // Todo pedido ao VPS passa por aqui: o token vai junto no corpo (o n8n confere antes de fazer qualquer coisa)
+    async function nookPost(payload, opts = {}) {
+      const resp = await fetch(localStorage.getItem('nook_webhook') || '', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, token: getToken() }),
+        ...opts
+      });
+      if (authFailed(resp) && Date.now() - lastAuthToastAt > 5000) {
+        lastAuthToastAt = Date.now();
+        showNookToast('O VPS recusou o token. Confira em Ajustes.', 'media/AC_settings.png', 'redo');
+      }
+      return resp;
+    }
+
+    function saveToken(silent) {
+      const v = document.getElementById('webhookToken').value.trim();
+      try { localStorage.setItem('nook_token', v); } catch (e) {}
+      if (silent !== true) showNookToast(v ? 'Token salvo!' : 'Token removido', 'media/AC_settings.png', 'enter');
+    }
+
+    function generateToken() {
+      const bytes = new Uint8Array(24);
+      crypto.getRandomValues(bytes);
+      const token = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      const el = document.getElementById('webhookToken');
+      el.value = token;
+      el.type = 'text'; // mostra o token gerado para você copiar
+      saveToken(true);
+      const done = (msg) => showNookToast(msg, 'media/AC_settings.png', 'stamp');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(token).then(() => done('Token gerado e copiado! Cole no n8n.')).catch(() => done('Token gerado: copie do campo e cole no n8n'));
+      } else {
+        done('Token gerado: copie do campo e cole no n8n');
+      }
+    }
+
+    // ---- Validação dos dados que entram (backup ou VPS): só campos conhecidos, formatos conferidos ----
+    const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+    function normalizeTimeLog(o, remote) {
+      if (!o || typeof o !== 'object') return null;
+      const id = String(o.id == null ? '' : o.id).slice(0, 80);
+      const date = String(o.date || '').slice(0, 10);
+      const minutes = Math.round(Number(o.minutes));
+      if (!id || !DATE_RE.test(date) || !(minutes >= 1 && minutes <= DAY_LIMIT)) return null;
+      return {
+        action: 'create_time',
+        id,
+        date,
+        category: String(o.category || 'Sem categoria').slice(0, 18),
+        minutes,
+        mm_scale: Number((minutes / 10).toFixed(2)),
+        synced: remote ? true : !!o.synced,
+        dirty: remote ? false : !!o.dirty
+      };
+    }
+
+    function normalizePost(o) {
+      if (!o || typeof o !== 'object') return null;
+      const id = String(o.id == null ? '' : o.id).slice(0, 80);
+      if (!id) return null;
+      const dataUrl = (v, kind) => (typeof v === 'string' && v.indexOf('data:' + kind + '/') === 0) ? v : null;
+      return {
+        action: 'create_post',
+        id,
+        date_occurred: DATE_RE.test(String(o.date_occurred)) ? o.date_occurred : todayISO(),
+        scheduled_post_date: DATE_RE.test(String(o.scheduled_post_date)) ? o.scheduled_post_date : todayISO(),
+        status: o.status === 'agendado' ? 'agendado' : 'rascunho',
+        location: String(o.location || '').slice(0, 120),
+        caption: String(o.caption || '').slice(0, 2200),
+        networks: Array.isArray(o.networks) ? o.networks.filter(n => NETWORKS.some(x => x.id === n)) : getDefaultNetworks(),
+        thumb_base64: dataUrl(o.thumb_base64, 'image'),
+        media_type: o.media_type === 'video' ? 'video' : 'image',
+        image_base64: dataUrl(o.image_base64, 'image'),
+        video_base64: dataUrl(o.video_base64, 'video'),
+        synced: false
+      };
+    }
+
+    function importTags(list) {
+      const tags = getTags();
+      let changed = false;
+      list.forEach(t => {
+        const name = t && typeof t.name === 'string' ? t.name.trim().slice(0, 18) : '';
+        if (!name || tags.some(x => x.name.toLowerCase() === name.toLowerCase())) return;
+        tags.push({ name, c: (parseInt(t.c) || 0) % TAG_PALETTE.length, icon: (t.icon && ICONS[t.icon]) ? t.icon : 'tag' });
+        changed = true;
+      });
+      if (changed) { saveTags(tags); populateCategorySelects(); }
+    }
+
+    // Junta registros ao banco do aparelho sem apagar nada. remote = dado vindo do VPS (pode atualizar o que já está sincronizado)
+    function mergeIntoDB({ times = [], posts = [], remote = false }) {
+      return new Promise((resolve) => {
+        const res = { added: 0, updated: 0, skipped: 0 };
+        const tx = db.transaction(['timeLogs', 'diaryQueue'], 'readwrite');
+        const tStore = tx.objectStore('timeLogs');
+        const pStore = tx.objectStore('diaryQueue');
+        times.forEach(t => {
+          const g = tStore.get(t.id);
+          g.onsuccess = () => {
+            const cur = g.result;
+            if (!cur) { tStore.put(t); res.added++; }
+            else if (remote && cur.synced && !cur.dirty && !cur.deleted) {
+              if (cur.date !== t.date || cur.minutes !== t.minutes || cur.category !== t.category) {
+                tStore.put({ ...cur, date: t.date, minutes: t.minutes, mm_scale: t.mm_scale, category: t.category });
+                res.updated++;
+              } else res.skipped++;
+            } else res.skipped++;
+          };
+        });
+        posts.forEach(po => {
+          const g = pStore.get(po.id);
+          g.onsuccess = () => {
+            if (!g.result) { pStore.put(po); res.added++; } else res.skipped++;
+          };
+        });
+        tx.oncomplete = () => resolve(res);
+        tx.onerror = tx.onabort = () => resolve({ ...res, failed: true });
+      });
+    }
+
+    function afterDataChange() {
+      updateQueueCounter();
+      renderPendingQueue();
+      renderStats();
+    }
+
+    async function importBackupJson(event) {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (file.size > 80 * 1048576) {
+        input.value = '';
+        return showNookToast('Arquivo grande demais!', 'media/AC_settings.png', 'redo');
+      }
+      let data;
+      try { data = JSON.parse(await file.text()); }
+      catch (e) { input.value = ''; return showNookToast('Esse arquivo não é um backup válido', 'media/AC_settings.png', 'redo'); }
+      input.value = '';
+
+      const rawTimes = data && Array.isArray(data.timeLogs) ? data.timeLogs : [];
+      const rawPosts = data && Array.isArray(data.diaryQueue) ? data.diaryQueue : [];
+      if (!rawTimes.length && !rawPosts.length) return showNookToast('Backup vazio ou inválido', 'media/AC_settings.png', 'redo');
+
+      const times = rawTimes.map(t => normalizeTimeLog(t, false)).filter(Boolean);
+      const posts = rawPosts.map(normalizePost).filter(Boolean);
+      const invalid = (rawTimes.length - times.length) + (rawPosts.length - posts.length);
+
+      const ok = await nookConfirm(
+        `${times.length} registros de tempo e ${posts.length} posts. O que já existe no aparelho é mantido.` + (invalid ? ` (${invalid} inválidos serão ignorados)` : ''),
+        { title: 'Importar backup?', okText: 'Importar' }
+      );
+      if (!ok) return;
+
+      if (data && Array.isArray(data.tags)) importTags(data.tags);
+      const r = await mergeIntoDB({ times, posts });
+      afterDataChange();
+      showNookToast(r.failed ? 'Erro ao importar' : `Importado: ${r.added} novos, ${r.skipped} já existiam`, 'media/AC_froggychair.png', r.failed ? 'redo' : 'nookTritone');
+    }
+
+    let pulling = false;
+    // Busca no VPS o histórico de tempo (o n8n precisa responder à action "list_times")
+    async function pullTimeLogsFromVPS(manual) {
+      const webhook = localStorage.getItem('nook_webhook');
+      if (!webhook || !navigator.onLine || !db) {
+        if (manual) showNookToast('Configure o Webhook / Wi-Fi!', 'media/AC_settings.png', 'redo');
+        return;
+      }
+      if (pulling) return;
+      pulling = true;
+      if (manual) playNookSound('wait');
+      try {
+        await syncQueueWithVPS(false); // primeiro sobe o que está pendente no aparelho
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 20000);
+        const resp = await nookPost({ action: 'list_times' }, { signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!resp.ok) {
+          if (!authFailed(resp)) showNookToast(`O VPS respondeu ${resp.status}`, 'media/AC_settings.png', 'redo');
+          return;
+        }
+        const data = await resp.json();
+        const arr = Array.isArray(data) ? data : ((data && (data.items || data.times)) || []);
+        const times = arr.map(o => normalizeTimeLog(o && o.json ? o.json : o, true)).filter(Boolean);
+        if (!times.length) {
+          if (manual) showNookToast('O VPS não devolveu registros de tempo', 'media/AC_settings.png', 'redo');
+          return;
+        }
+        const r = await mergeIntoDB({ times, remote: true });
+        afterDataChange();
+        showNookToast(`Histórico: ${r.added} novos, ${r.updated} atualizados`, 'media/AC_froggychair.png', 'nookTritone');
+      } catch (e) {
+        if (manual) showNookToast('Não consegui puxar do VPS', 'media/AC_settings.png', 'redo');
+      } finally {
+        pulling = false;
+      }
+    }
+
+    // Primeira vez num aparelho sem registros: oferece buscar o histórico no VPS (pergunta uma vez só)
+    async function maybeOfferPull() {
+      if (localStorage.getItem('nook_pull_asked') || !navigator.onLine || !localStorage.getItem('nook_webhook') || !db) return;
+      const count = await new Promise(res => {
+        const r = db.transaction('timeLogs', 'readonly').objectStore('timeLogs').count();
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res(-1);
+      });
+      if (count !== 0) return;
+      try { localStorage.setItem('nook_pull_asked', '1'); } catch (e) {}
+      const ok = await nookConfirm('Este aparelho está sem registros de tempo. Quer buscar o histórico guardado no VPS?', { title: 'Puxar do VPS?', okText: 'Buscar', cancelText: 'Agora não' });
+      if (ok) pullTimeLogsFromVPS(true);
     }
 
     // ==========================================
@@ -2630,11 +2847,7 @@
       const webhook = localStorage.getItem('nook_webhook');
       if (!webhook || !navigator.onLine) return false;
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "set_paused", paused: autoPaused })
-        });
+        const resp = await nookPost({ action: "set_paused", paused: autoPaused });
         if (resp.ok) {
           try { localStorage.setItem('nook_paused_dirty', 'false'); } catch (e) {}
           return true;
@@ -2662,12 +2875,7 @@
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 6000);
       try {
-        const resp = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "get_settings" }),
-          signal: ctrl.signal
-        });
+        const resp = await nookPost({ action: "get_settings" }, { signal: ctrl.signal });
         clearTimeout(timer);
         if (!resp.ok) return;
         const data = await resp.json();
@@ -2793,11 +3001,7 @@
 
       for (const item of diaryItems) {
         try {
-          const resp = await fetch(webhook, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
+          const resp = await nookPost(item);
           if (resp.ok) {
             sent++;
             db.transaction("diaryQueue", "readwrite").objectStore("diaryQueue").delete(item.id);
@@ -2815,11 +3019,7 @@
         try {
           // create_time (novo) • update_time (editado) • delete_time (apagado)
           const action = item.deleted ? 'delete_time' : (item.dirty ? 'update_time' : 'create_time');
-          const resp = await fetch(webhook, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...item, action })
-          });
+          const resp = await nookPost({ ...item, action });
           if (resp.ok) {
             sent++;
             const store = db.transaction("timeLogs", "readwrite").objectStore("timeLogs");
@@ -2845,7 +3045,14 @@
       const r1 = tx.objectStore("timeLogs").getAll();
       const r2 = tx.objectStore("diaryQueue").getAll();
       tx.oncomplete = () => {
-        const blob = new Blob([JSON.stringify({ timeLogs: r1.result.filter(i => !i.deleted), diaryQueue: r2.result }, null, 2)], { type: "application/json" });
+        const backup = {
+          version: 2,
+          exported_at: new Date().toISOString(),
+          tags: getTags(),
+          timeLogs: r1.result.filter(i => !i.deleted),
+          diaryQueue: r2.result
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `nookphone-backup-${todayISO()}.json`;
